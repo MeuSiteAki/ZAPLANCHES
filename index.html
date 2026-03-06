@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZapLanche | Cardápio Digital</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+:root {
+    --primary: #15ff00;
+    --dark: #0f0f0f;
+    --card: #1a1a1a;
+    --text: #ffffff;
+    --green: #25D366;
+    --gray: #333;
+    --danger: #ff3b30;
+    --btn-success: rgb(0, 100, 0);
+}
+
+* { margin:0; padding:0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background-color: var(--dark); color: var(--text); scroll-behavior: smooth; overflow-x: hidden; }
+
+/* Tela de Carregamento */
+#intro-screen {
+    position: fixed; inset: 0; background: var(--dark); z-index: 9999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    animation: fadeOut 0.5s forwards 2.5s;
+}
+.intro-logo { width: 50%; animation: pulse 1s infinite alternate; border-radius: 50px; }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+@keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+/* Header / Brand */
+.brand-section { padding: 40px 20px; text-align: center; background: linear-gradient(180deg, #1e1e1e 0%, #0f0f0f 100%); border-bottom: 1px solid var(--gray); }
+.logo-box { position: relative; display: inline-block; margin-bottom: 15px; }
+.logo-box img { width: 200px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); box-shadow: 0 0 25px rgba(255, 215, 0, 0.3); }
+.brand-info h1 { font-size: 100px; letter-spacing: -1px; }
+.brand-info h1 span { color: var(--primary); }
+.status-badge { font-size: 0.9rem; margin-top: 5px; opacity: 0.9; }
+/* Transição suave para a cor não mudar bruscamente */
+.brand-section {
+    transition: background-color 0.5s ease;
+    padding: 20px; /* Ajuste o padding se necessário */
+}
+
+/* Cores de fundo */
+.bg-aberto {
+    background-color: #1b4332 !important; /* Verde escuro profissional */
+}
+
+.bg-fechado {
+    background-color: #ff0000 !important; /* Vermelho escuro profissional */
+}
+
+/* Garante que o texto continue visível no fundo colorido */
+.brand-section h1, .brand-section .brand-info, .brand-section .status-badge {
+    color: white !important;
+    font-size: 20px;
+}
+
+/* Busca */
+.search-container { max-width: 500px; margin: 25px auto 0; position: relative; padding: 0 20px; }
+.search-container input { 
+    width: 100%; padding: 15px 20px 15px 50px; border-radius: 30px; border: 1px solid var(--gray);
+    background: #222; color: white; outline: none; transition: 0.3s; font-size: 1rem;
+}
+.search-container input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
+.search-container i { position: absolute; left: 35px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 1.2rem; }
+
+/* Menu de Categorias - GRID 2x2 NO MOBILE / LINHA NO PC */
+.categories-wrapper { 
+    max-width: 1000px; margin: 15px auto; 
+    position: sticky; top: 0; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px);
+    z-index: 500; padding: 10px; border-radius: 0 0 20px 20px;
+}
+
+.tabs-container { 
+    display: flex; 
+    justify-content: center; /* Centraliza no PC */
+    gap: 12px; 
+    width: 100%;
+    padding: 5px;
+}
+
+.tab-item { 
+    flex: 1;
+    max-width: 200px;
+    padding: 12px 20px; 
+    border-radius: 15px; 
+    border: 1px solid var(--gray); 
+    background: var(--card); 
+    color: white; 
+    cursor: pointer; 
+    text-align: center;
+    font-size: 0.9rem; 
+    font-weight: 600; 
+    transition: 0.2s; 
+    white-space: nowrap;
+}
+
+.tab-item.active { background: var(--primary); color: black; border-color: var(--primary); }
+
+/* Ajuste Celular: Grid 2 colunas e Remove setas */
+@media (max-width: 600px) {
+    .tabs-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 Colunas */
+        gap: 10px;
+    }
+    .tab-item {
+        max-width: none;
+        padding: 15px 5px;
+    }
+    .nav-arrow { display: none !important; } /* Garante que setas sumam */
+}
+
+/* Listagem de Produtos */
+.products-grid { 
+    display: grid; grid-template-columns: repeat(2, 1fr); 
+    gap: 15px; max-width: 1100px; margin: 0 auto; padding: 20px;
+}
+.product-card { background: var(--card); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; border: 1px solid transparent; }
+.product-card:hover { border-color: var(--gray); transform: translateY(-5px); }
+.product-card img { width: 100%; height: 140px; object-fit: cover; }
+.p-content { padding: 15px; flex: 1; display: flex; flex-direction: column; }
+.p-content h3 { font-size: 1rem; margin-bottom: 5px; height: 45px; overflow: hidden; line-height: 1.2; }
+.p-price { color: var(--primary); font-size: 1.2rem; font-weight: 800; margin-bottom: 15px; }
+
+/* Botão ADICIONAR Personalizado Verde */
+.p-actions { margin-top: auto; }
+.p-actions .btn-details {
+    width: 100%;
+    background: var(--btn-success);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 100, 0, 0.3);
+}
+
+.p-actions .btn-details:hover {
+    background: #27ec00;
+    transform: translateY(-2px);
+}
+
+/* Modais */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 30000; padding: 20px; }
+.modal-content { 
+    background: var(--card); width: 100%; max-width: 500px; border-radius: 25px; 
+    overflow: hidden; position: relative; animation: modalIn 0.3s ease-out;
+    max-height: 95vh; display: flex; flex-direction: column;
+}
+@keyframes modalIn { from { transform: translateY(50px); opacity: 0; } }
+.close-modal { 
+    position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); 
+    color: white; border: none; width: 40px; height: 40px; border-radius: 50%; 
+    font-size: 1.5rem; cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center;
+}
+
+#modal-img { width: 100%; height: 180px; object-fit: cover; }
+#modal-desc { flex: 1; overflow-y: auto; padding: 15px; }
+
+/* Controles de Adicionais +/- */
+.add-item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #333; }
+.add-controls { display: flex; align-items: center; gap: 12px; }
+.btn-add-minus {
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--primary);
+    background: transparent; color: var(--primary); font-weight: bold; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.btn-add-minus:active { background: var(--primary); color: white; }
+.add-qty { font-weight: bold; min-width: 20px; text-align: center; color: white; }
+
+/* Rodapé do Modal Fixo */
+.modal-footer {
+    padding: 15px; background: var(--card); border-top: 1px solid var(--gray);
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+/* Carrinho Sidebar */
+/* --- Carrinho Sidebar (Visual Original Restaurado) --- */
+#cart-sidebar { 
+    position: fixed; right: -100%; top: 0; width: 100%; max-width: 450px; 
+    height: 100%; background: #0a0a0a; z-index: 4000; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex; flex-direction: column; border-left: 1px solid var(--gray);
+}
+#cart-sidebar.open { right: 0; }
+
+.cart-header { 
+    padding: 15px 20px; border-bottom: 1px solid var(--gray); 
+    display: flex; justify-content: space-between; align-items: center; 
+}
+
+.cart-body { flex: 1; overflow-y: auto; padding: 15px; }
+
+.cart-footer { 
+    padding: 15px 20px; background: #111; border-top: 2px solid var(--gray); 
+}
+
+/* Itens do Carrinho Original */
+.cart-item { 
+    display: flex; justify-content: space-between; align-items: center; 
+    background: #1a1a1a; padding: 10px 15px; border-radius: 12px; 
+    margin-bottom: 8px; font-size: 0.9rem; 
+}
+
+.qty-controls { display: flex; align-items: center; gap: 10px; }
+
+.btn-qty { 
+    width: 28px; height: 28px; border-radius: 6px; border: none; 
+    cursor: pointer; font-weight: bold; color: white; background: #333;
+}
+
+/* --- Tipo de Pedido (Radios Originais) --- */
+.order-type { display: flex; gap: 10px; margin-bottom: 15px; }
+.order-type label { 
+    flex: 1; text-align: center; padding: 8px; border-radius: 10px; 
+    cursor: pointer; font-size: 0.85rem; background: #222; border: 1px solid var(--gray);
+    transition: 0.3s; color: #aaa;
+}
+.order-type input { display: none; }
+.order-type label:has(input:checked) { 
+    background: var(--primary); color: black; font-weight: bold; border-color: var(--primary); 
+}
+
+/* --- Inputs e Botão Finalizar Originais --- */
+.cart-footer input, .cart-footer select { 
+    width: 100%; background: #1a1a1a; border: 1px solid var(--gray); 
+    padding: 10px 14px; border-radius: 10px; color: white; 
+    margin-bottom: 8px; font-size: 0.9rem;
+}
+
+.total-row { 
+    font-size: 1.2rem; font-weight: 800; color: var(--primary); 
+    display: flex; justify-content: space-between; margin: 10px 0; 
+}
+
+.btn-finalizar { 
+    width: 100%; padding: 15px; background: var(--green); border: none; 
+    color: white; font-weight: 800; font-size: 1rem; border-radius: 12px; cursor: pointer; 
+}
+
+/* --- Botão Flutuante e Toast Originais --- */
+#float-cart { 
+    position: fixed; bottom: 30px; right: 30px; width: 70px; height: 70px; 
+    background: var(--primary); border-radius: 22px; border: none; font-size: 30px; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6); cursor: pointer; z-index: 1000;
+    display: flex; align-items: center; justify-content: center; transition: 0.3s;
+}
+#float-cart:active { transform: scale(0.9); }
+#cart-count { 
+    position: absolute; top: -8px; right: -8px; background: var(--danger); 
+    color: white; font-size: 13px; width: 28px; height: 28px; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center; border: 3px solid var(--dark);
+}
+
+#toast { 
+    visibility: hidden; position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); 
+    background: var(--green); color: white; padding: 15px 30px; border-radius: 40px; 
+    z-index: 5000; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+@media (max-width: 600px) {
+    .brand-info h1 { font-size: 1.8rem; }
+    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+    .product-card img { height: 120px; }
+}
+/* Container principal do Modal Pix */
+#pix-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85); /* Fundo escuro semi-transparente */
+    display: none; /* Inicialmente escondido, o JS muda para 'flex' */
+    justify-content: center;
+    align-items: center;
+    z-index: 999999; /* Valor altíssimo para ficar na frente de TUDO (inclusive do carrinho) */
+    padding: 20px;
+}
+
+/* A caixa branca/escura que contém o conteúdo do Pix */
+.pix-content {
+    background: var(--card-bg); /* Ou #161618 */
+    padding: 25px;
+    border-radius: 15px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center; /* Centraliza o texto e o QR Code */
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+/* Garante que a imagem do QR Code seja centralizada e não estoure o tamanho */
+#qrcode-img {
+    display: block;
+    margin: 15px auto;
+    max-width: 200px;
+    border-radius: 10px;
+    background: #fff; /* Fundo branco para o QR Code ser lido facilmente */
+    padding: 10px;
+}
+
+/* O texto do código "Copia e Cola" */
+#pix-payload-text {
+    word-break: break-all; /* Quebra o texto longo para não sair da tela */
+    font-size: 0.8rem;
+    background: #000;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    color: var(--text-dim);
+}
+    </style>
+</head>
+<body>
+
+  <div id="intro-screen">
+        <img src="logo.png" class="intro-logo">
+        <h1 style="margin-top:15px; color: white;">ZAP<span style="color: var(--primary);">LANCHES</span></h1>
+    </div>
+
+    <audio id="success-sound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+
+    <header class="brand-section">
+    <div class="logo-box">
+        <img src="logo.png" alt="Logo ZapLanche">
+    </div>
+    <div class="brand-info">
+        <h1>ZAP<span>LANCHES</span></h1>
+        <div class="status-badge"><span style="color:var(--green)">●</span> Aberto • 18:00 às 23:30</div>
+    </div>
+    <div class="search-container">
+        <i class="fas fa-search"></i>
+        <input type="text" id="search-input" placeholder="Pesquisar lanche..." oninput="searchItems(this.value)">
+    </div>
+</header>
+<script>
+    function atualizarStatusLoja() {
+    const agora = new Date();
+    const diaSemana = agora.getDay(); // 0:Dom, 4:Qui
+    const hora = agora.getHours();
+    const minutos = agora.getMinutes();
+    const horarioAtual = hora + (minutos / 60);
+
+    const header = document.querySelector('.brand-section');
+    const badge = document.querySelector('.status-badge');
+    const btnFinalizar = document.getElementById('btn-finalizar-pedido');
+
+    // Configurações: Aberto 18:30 às 23:59 | Folga na Quinta (4)
+    const isQuinta = (diaSemana === 4);
+    const isHorario = (horarioAtual >= 18.5 && horarioAtual <= 23.99);
+
+    if (!isQuinta && isHorario) {
+        // --- ESTADO ABERTO ---
+        header.classList.remove('bg-fechado');
+        header.classList.add('bg-aberto');
+        badge.innerHTML = `<span style="color:#4ade80">●</span> Aberto • 18:30 às 23:59`;
+        if(btnFinalizar) btnFinalizar.disabled = false;
+    } else {
+        // --- ESTADO FECHADO ---
+        header.classList.remove('bg-aberto');
+        header.classList.add('bg-fechado');
+        
+        let motivo = isQuinta ? "Folga hoje" : "Abrimos às 18:30";
+        badge.innerHTML = `<span style="color:#ff6b6b">●</span> Fechado • ${motivo}`;
+        if(btnFinalizar) btnFinalizar.disabled = true;
+    }
+}
+
+// Executa ao carregar
+atualizarStatusLoja();
+// Atualiza a cada 30 segundos
+setInterval(atualizarStatusLoja, 30000);
+</script>
+    <div class="categories-wrapper">
+        <nav class="tabs-container" id="tabs-scroll">
+            <button class="tab-item active" onclick="filterItems('todos', this)">🔥 Todos</button>
+            <button class="tab-item" onclick="filterItems('burgers', this)">🍔 TRADICIONAIS</button>
+            <button class="tab-item" onclick="filterItems('art', this)">🎁 ARTESANAIS</button>
+            <button class="tab-item" onclick="filterItems('bebidas', this)">🥤 BEBIDAS</button>
+        </nav>
+    </div>
+
+    <main id="menu-grid" class="products-grid"></main>
+
+    <div id="product-modal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            
+            <img id="modal-img" src="" alt="Imagem do Produto">
+
+            <div id="modal-desc">
+                <h2 id="modal-title" style="font-size: 1.5rem; margin-bottom: 5px; color: var(--text);"></h2>
+                <div id="modal-desc-content"></div>
+                
+                </div>
+
+            <div class="modal-footer">
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 0.8rem; color: #aaa;">Preço Total:</span>
+                    <span id="modal-price" style="color: var(--primary); font-weight: 900; font-size: 1.4rem;">R$ 0,00</span>
+                </div>
+                <button id="modal-add-btn" class="btn-finalizar" style="flex: 1; margin-left: 15px;">
+                    CONFIRMAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pix-modal" class="modal" onclick="closePixModal()">
+        <div class="pix-container" onclick="event.stopPropagation()">
+            <h2 style="color: #25D366; font-size: 1.5rem;"><i class="fas fa-qrcode"></i> Pagamento Pix</h2>
+            <p style="font-size:0.85rem; margin-top:5px; color:#666;">Pague agora para agilizar seu pedido</p>
+            <img id="qrcode-img" src="">
+            <div class="pix-payload-box" id="pix-payload-text"></div>
+            <button onclick="copyPixCode()" style="width:100%; padding:14px; background:#007bff; color:white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; margin-bottom:12px;">COPIAR CÓDIGO PIX</button>
+            <button onclick="confirmarEPublicar()" style="width:100%; padding:16px; background:var(--green); color:white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; font-size:1rem;">JÁ PAGUEI, ENVIAR PEDIDO</button>
+        </div>
+    </div>
+
+    <aside id="cart-sidebar">
+        <div class="cart-header">
+            <h2 style="font-size:1.2rem;"><i class="fas fa-shopping-cart"></i> Seu Pedido</h2>
+            <button onclick="toggleCart()" style="background:none; border:none; color:white; font-size:1.5rem;"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="cart-body">
+            <div class="order-type">
+                <label>
+                    <input type="radio" name="tipo_pedido" value="delivery" checked onclick="toggleEntrega(true)">
+                    🛵 Delivery
+                </label>
+                <label>
+                    <input type="radio" name="tipo_pedido" value="retirada" onclick="toggleEntrega(false)">
+                    🥡 Retirada
+                </label>
+            </div>
+
+            <div id="cart-items">
+                </div>
+        </div>
+
+        <div class="cart-footer">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size: 0.85rem; opacity:0.8;">
+                <span>Taxa de Entrega:</span>
+                <span id="frete">R$ 0,00</span>
+            </div>
+            <div class="total-row">
+                <span>Total:</span>
+                <span id="cart-total">R$ 0,00</span>
+            </div>
+            
+            <form id="checkout-form">
+                <input type="text" id="nome" placeholder="Seu Nome Completo" required>
+                <input type="tel" id="telefone" placeholder="Telefone / WhatsApp" required>
+                
+                <div id="endereco-campos">
+    <select id="bairro" onchange="updateFrete()">
+        <option value="">Selecione seu Bairro</option>
+        <option value="Itinga-PA">Itinga-PA (R$ 6,00)</option>
+        <option value="Paulistão">Paulistão (R$ 6,00)</option>
+        <option value="Jamel">Jamel (R$ 4,00)</option>
+        <option value="São João">São João (R$ 3,00)</option>
+        <option value="São Sebastião">São Sebastião (R$ 2,00)</option>
+        <option value="Vila Samuel">Vila Samuel (R$ 2,00)</option>
+        <option value="Vila Emanuela">Vila Emanuela (R$ 2,00)</option>
+        <option value="Célio Brás">Célio Brás (R$ 2,00)</option>
+        <option value="Centro">Centro (R$ 2,00)</option>
+        <option value="Coqueiral">Coqueiral (R$ 2,00)</option>
+        <option value="Jardim Planalto">Jardim Planalto (R$ 2,00)</option>
+        <option value="Parque Primavera">Parque Primavera (R$ 2,00)</option>
+        <option value="Vila Pimentel 2">Vila Pimentel 2 (R$ 2,00)</option>
+        <option value="Loteamento Brasil">Loteamento Brasil (R$ 2,00)</option>
+        <option value="Paraíso">Paraíso (GRÁTIS)</option>
+    </select>
+    <input type="text" id="endereco" placeholder="Endereço: Rua, número, apto...">
+</div>
+
+                <select id="pagamento" onchange="checkPagamento(this.value)" required>
+                    <option value="Pix">Pagar com Pix (Online)</option>
+                    <option value="Cartão">Cartão (Na entrega)</option>
+                    <option value="Dinheiro">Dinheiro (Na entrega)</option>
+                </select>
+                
+                <div id="troco-box" style="display:none">
+                    <input type="number" id="troco" placeholder="Troco para quanto?">
+                </div>
+
+                <button type="submit" class="btn-finalizar">
+                    FINALIZAR PEDIDO
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <button id="float-cart" onclick="toggleCart()">
+        <i class="fas fa-shopping-basket"></i>
+        <span id="cart-count">0</span>
+    </button>
+
+    <div id="toast"></div>
+    <!-- FOOTER -->
+
+    <footer class="site-footer">
+  <div class="footer-container">
+
+    <div class="footer-block footer-contact">
+      <h3><i class="fa-solid fa-headset"></i> CONTATOS:</h3>
+      <p><a href="tel:+5599992261907">(99) 99226-1907</a></p>
+      <p>Endereço: Av. João Vieira (rua da draga), S/N,<br>Vila Emanuela, Itinga do Maranhão.</p>
+    </div>
+
+    <div class="footer-block footer-hours">
+      <h3>Horário de Atendimento:</h3>
+      <p>Todos os dias: 18:30 – 23:59</p>
+    </div>
+
+    <div class="footer-block footer-payments">
+      <h3>Formas de Pagamento:</h3>
+      <img style="width: 200px; border-radius: 10px;" src="cartao.webp" alt="Emblemas de formas de pagamento">
+    </div>
+
+  </div>
+
+  <div class="footer-copy">
+    Site criado por: Carlos de Freitas Rocha.<br>
+    <a style="color: #fdfdfd;" href="https://wa.me/5599992247546">Clique aqui e faça seu orçamento.</a>
+  </div>
+</footer>
+<style>
+
+.site-footer { background: linear-gradient(135deg, #272931, #1c1e26); color: #f0f0f0; 
+    padding: 5px ; font-family: 'Helvetica Neue', Arial, sans-serif; 
+    font-size: 14px; line-height: 1.6; text-align: center; border-radius: 10px;}
+
+.footer-container { display: flex; flex-wrap: wrap; justify-content: space-between; max-width: 1200px; margin: auto; }
+
+.footer-block { flex: 1 1 280px; margin: 10px; }
+
+.footer-block h3 { margin-bottom: 12px; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; color: #ffffff; }
+
+.footer-block p { margin: 4px 0; }
+
+.footer-contact a { color: #ffcc00; text-decoration: none; transition: color .3s; }
+
+.footer-contact a:hover { color: #ffe066; }
+
+.off-day { font-style: italic; color: #c1c1c1; }
+
+.footer-payments img { max-width: 100%; height: auto; margin-top: 8px; }
+
+.footer-copy { text-align: center; margin-top: 30px; font-size: 15px; color: #ffffff; }
+
+</style><br>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDRj1Cj0o1z9u7fS9InPlSlqvmcetMmMUU",
+        authDomain: "hamb1-2733f.firebaseapp.com",
+        projectId: "hamb1-2733f",
+        storageBucket: "hamb1-2733f.firebasestorage.app",
+        messagingSenderId: "244052884947",
+        appId: "1:244052884947:web:2c6df704023493fe8e4326"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // --- DADOS ---
+
+const produtos = [
+        // --- BURGERS GOURMET ---
+        { id: 1, nome: "Burguer Mini", preco: 21.00, cat: "art", desc: "Blend bovino grelhado (160g), queijo mussarela, salada, batata frita e molho barbecue.", img: "https://images.unsplash.com/photo-1521305916504-4a1121188589?w=400" },
+        { id: 2, nome: "Burguer Classic", preco: 22.00, cat: "art", desc: "Blend bovino (160g), mussarela, molho cheddar, salada, fritas e barbecue.", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400" },
+        { id: 3, nome: "Burguer Poleguinho", preco: 23.00, cat: "art", desc: "Blend bovino (160g), mussarela, queijo polenguinho, salada, fritas e barbecue.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400" },
+        { id: 4, nome: "Burguer Pepperoni", preco: 25.00, cat: "art", desc: "Blend (160g), mussarela, cheddar, calabresa, cebola caramelizada, salada e fritas.", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400" },
+        { id: 5, nome: "Burguer Cheese Bacon", preco: 26.00, cat: "art", desc: "Blend (160g), mussarela, cheddar, bacon defumado, cebola caramelizada, salada e fritas.", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400" },
+        { id: 6, nome: "Burguer Double", preco: 32.00, cat: "art", desc: "2 Blends (160g), mussarela, cheddar, bacon, cebola caramelizada, salada e fritas.", img: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=400" },
+
+        // --- BURGERS TRADICIONAIS ---
+        { id: 7, nome: "Zap Quente", preco: 6.00, cat: "burgers", desc: "Pão com gergelim, queijo e presunto.", img: "https://images.unsplash.com/photo-1521390188846-e2a3f9745b6f?w=400" },
+        { id: 8, nome: "Zap X-Burguer", preco: 12.00, cat: "burgers", desc: "Pão, salada, carne, queijo e batata palha.", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400" },
+        { id: 9, nome: "Zap Egg", preco: 14.00, cat: "burgers", desc: "Pão, salada, carne, queijo, ovo e batata palha.", img: "https://images.unsplash.com/photo-1547584370-2cc98b8b8dc8?w=400" },
+        { id: 10, nome: "Zap Bacon", preco: 16.00, cat: "burgers", desc: "Pão, salada, carne, queijo, bacon, ovo e batata palha.", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400" },
+        { id: 11, nome: "Zap Calabresa", preco: 14.00, cat: "burgers", desc: "Pão, salada, carne, queijo, calabresa e batata palha.", img: "https://images.unsplash.com/photo-1629119088170-12f053bed610?w=400" },
+        { id: 12, nome: "Zap Salada Especial", preco: 15.00, cat: "burgers", desc: "Pão, salada, carne, queijo, presunto, ovo, milho e batata palha.", img: "https://images.unsplash.com/photo-1512152272829-e3139592d56f?w=400" },
+        { id: 13, nome: "Zap Tudo", preco: 20.00, cat: "burgers", desc: "Pão, salada, carne, queijo, presunto, ovo, bacon, salsicha, cheddar, milho e palha.", img: "https://images.unsplash.com/photo-1610440042657-612f34d95e9f?w=400" },
+        { id: 14, nome: "Zap Broca", preco: 25.00, cat: "burgers", desc: "Pão, salada, 2 carnes, queijo, presunto, 2 ovos, bacon, salsicha, cheddar, milho e palha.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400" },
+        { id: 15, nome: "Zap Frango", preco: 20.00, cat: "burgers", desc: "Pão, salada, filé de frango, queijo, presunto, cheddar e batata palha.", img: "https://images.unsplash.com/photo-1610614819513-58e34989848b?w=400" },
+        { id: 16, nome: "Zap Filé", preco: 22.00, cat: "burgers", desc: "Pão, salada, filé de gado, queijo, presunto, cheddar e batata palha.", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400" },
+
+        // --- PORÇÕES ---
+        { id: 17, nome: "Batata Frita", preco: 17.00, cat: "porcoes", desc: "Porção individual de batata frita crocante.", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400" },
+
+        // --- SUCOS ---
+       // Adicione/Substitua no seu array de produtos:
+{ id: 200, nome: "Refrigerante Lata", preco: 6.00, cat: "bebidas", desc: "Escolha o sabor no próximo passo.", img: "https://images.unsplash.com/photo-1525193612562-0ec53b0e5d7c?w=400", opcoes: ["Coca Cola", "Fanta Laranja", "Guaraná Antártica", "Sprite", "Coca Zero", "Fanta Uva", "Guaraná Jesus"] },
+{ id: 300, nome: "Refrigerante 1 Litro", preco: 10.00, cat: "bebidas", desc: "Escolha o sabor no próximo passo.", img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400", opcoes: ["Coca Cola", "Fanta Laranja", "Guaraná Antártica", "Coca Zero"] },
+{ id: 400, nome: "Refrigerante 2 Litros", preco: 14.00, cat: "bebidas", desc: "Escolha o sabor no próximo passo.", img: "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400", opcoes: ["Coca Cola", "Fanta Laranja", "Guaraná Antártica", "Coca Zero"] },
+{ id: 100, nome: "Sucos Naturais", preco: 7.00, cat: "bebidas", desc: "Escolha o sabor:", img: "https://images.unsplash.com/photo-1595981267035-7b04ca84a810?w=400", opcoes: ["Acerola", "Goiaba", "Maracujá"] },
+        ];
+
+    const listaAdicionais = [
+        { nome: "Ovo", preco: 2.00 },
+        { nome: "Queijo Mussarela", preco: 4.00 },
+        { nome: "Queijo Polenguinho", preco: 5.00 },
+        { nome: "Molho Cheddar", preco: 5.00 },
+        { nome: "Cebola Caramelizada", preco: 5.00 },
+        { nome: "Bacon Defumado", preco: 6.00 },
+        { nome: "Calabresa", preco: 5.00 },
+        { nome: "Carne Extra (Tradicional)", preco: 6.00 },
+        { id_art: "blend", nome: "Blend Bovino (160g)", preco: 10.00 },
+        { nome: "Presunto", preco: 4.00 },
+        { nome: "Salsicha", preco: 3.00 },
+        { nome: "Filé Frango/Gado", preco: 10.00 },
+        { nome: "Molho Extra", preco: 3.00 }
+    ];
+
+    let carrinho = {};
+    let valorSubtotal = 0;
+    let valorFrete = 0;
+    let isDelivery = true;
+    let itemAtualParaAdicionar = null;
+    let adicionaisTemp = {};
+
+    window.filterItems = (cat, btn) => {
+        document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderMenu(cat === 'todos' ? produtos : produtos.filter(p => p.cat === cat));
+        window.scrollTo({ top: document.getElementById('menu-grid').offsetTop - 120, behavior: 'smooth' });
+    };
+
+    window.searchItems = (q) => {
+        const filtrados = produtos.filter(p => p.nome.toLowerCase().includes(q.toLowerCase()));
+        renderMenu(filtrados);
+        if (q.length > 0) {
+            window.scrollTo({ top: document.getElementById('menu-grid').offsetTop - 120, behavior: 'auto' });
+        }
+    };
+
+    // --- MODAL E ADICIONAIS ATUALIZADO ---
+   // --- FUNÇÃO PARA ABRIR O MODAL ---
+window.abrirModalCustomizacao = (id) => {
+    const p = produtos.find(i => i.id === id);
+    if (!p) return;
+
+    // Criamos uma cópia do produto e limpamos os adicionais temporários
+    itemAtualParaAdicionar = { ...p, sabor: "" }; 
+    adicionaisTemp = {}; // Reinicia o objeto de contagem
+
+    document.getElementById('modal-img').src = p.img;
+    document.getElementById('modal-title').innerText = p.nome;
+    
+    let htmlContent = `<p style="margin-bottom:12px; font-size:0.9rem; color:#ccc;">${p.desc}</p>`;
+
+    // 1. SE FOR BEBIDA OU SUCO (ITENS COM OPÇÕES)
+    if (p.opcoes) {
+        htmlContent += `
+            <div style="text-align:left; background:#222; padding:15px; border-radius:12px; margin-bottom:15px;">
+                <b style="color:var(--primary); font-size:1rem; display:block; margin-bottom:12px;">ESCOLHA O SABOR:</b>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${p.opcoes.map(sabor => `
+                        <label style="display: flex; align-items:center; gap: 10px; background:#333; padding:12px; border-radius:10px; cursor:pointer; border: 1px solid #444;">
+                            <input type="radio" name="sabor_bebida" value="${sabor}" 
+                                   onchange="window.definirSabor('${sabor}', ${p.id})" 
+                                   style="accent-color:var(--primary); width:18px; height:18px;">
+                            <span style="color:white; font-size:1rem;">${sabor}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>`;
+    } 
+ 
+    // 2. SE FOR LANCHE (MOSTRAR ADICIONAIS ESCONDIDOS)
+    else {
+        htmlContent += `
+            <div style="text-align:left; margin-bottom:15px;">
+                <button type="button" onclick="window.toggleAdicionais()" 
+                    style="width:100%; background:#333; color:var(--primary); border:1px solid #444; padding:12px; border-radius:10px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+                    ADICIONAR EXTRAS? 
+                    <span id="seta-adicionais">▼</span>
+                </button>
+
+                <div id="lista-adicionais-content" style="display:none; background:#222; padding:12px; border-radius:0 0 10px 10px; border:1px solid #444; border-top:none; max-height:250px; overflow-y:auto; transition: 0.3s;">
+                    <div id="lista-adicionais-container">
+                        ${listaAdicionais.map((add, index) => {
+                            adicionaisTemp[index] = 0; 
+                            return `
+                            <div class="add-item-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#2a2a2a; padding:8px; border-radius:8px;">
+                                <div class="add-controls" style="display:flex; align-items:center; gap:10px;">
+                                    <button type="button" class="btn-add-minus" onclick="window.updateAddon(${index}, -1)" style="width:30px; height:30px; border-radius:5px; border:none; background:#444; color:white;">-</button>
+                                    <span class="add-qty" id="qty-add-${index}" style="color:white; font-weight:bold; min-width:15px; text-align:center;">0</span>
+                                    <button type="button" class="btn-add-minus" onclick="window.updateAddon(${index}, 1)" style="width:30px; height:30px; border-radius:5px; border:none; background:var(--primary); color:black;">+</button>
+                                    <span style="font-size:0.9rem; color:white;">${add.nome}</span>
+                                </div>
+                                <span style="color:var(--primary); font-size:0.85rem;">+ R$ ${add.preco.toFixed(2)}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    // Campo de Observação
+    htmlContent += `
+        <b style="color:var(--primary); display:block; margin-top:15px; font-size:1rem;">OBSERVAÇÃO:</b>
+        <textarea id="item-obs" placeholder="Ex: Sem cebola, bem passado..." style="width:100%; padding:10px; border-radius:10px; background:#111; color:white; border:1px solid #444; margin-top:8px; height:60px; resize:none; font-size:0.85rem;"></textarea>
+    `;
+
+    document.getElementById('modal-desc-content').innerHTML = htmlContent;
+    window.atualizarPrecoModal();
+    document.getElementById('product-modal').style.display = 'flex';
+};
+window.toggleAdicionais = () => {
+    const content = document.getElementById('lista-adicionais-content');
+    const seta = document.getElementById('seta-adicionais');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        seta.innerText = '▲';
+        // Faz um scroll suave para mostrar os adicionais
+        content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        content.style.display = 'none';
+        seta.innerText = '▼';
+    }
+};
+// --- FUNÇÃO PARA ATUALIZAR A QUANTIDADE DE ADICIONAIS NO CLIQUE ---
+window.updateAddon = (index, delta) => {
+    // Pegamos a quantidade atual ou 0
+    let qtdAtual = adicionaisTemp[index] || 0;
+    let novaQtd = qtdAtual + delta;
+
+    // Impede que a quantidade seja menor que zero
+    if (novaQtd >= 0) {
+        adicionaisTemp[index] = novaQtd;
+        
+        // Atualiza o número que aparece entre o + e o -
+        const display = document.getElementById(`qty-add-${index}`);
+        if (display) display.innerText = novaQtd;
+
+        // Atualiza o preço total no rodapé do modal
+        window.atualizarPrecoModal();
+    }
+};
+
+// --- FUNÇÃO PARA DEFINIR O SABOR ---
+window.definirSabor = (sabor, id) => {
+    itemAtualParaAdicionar.sabor = sabor;
+    
+    // Lógica do preço do Maracujá (ID 100 é o de Sucos)
+    if (id === 100) {
+        itemAtualParaAdicionar.preco = (sabor === 'Maracujá') ? 8.00 : 7.00;
+    }
+    window.atualizarPrecoModal();
+};
+
+// --- ATUALIZAR PREÇO NO MODAL ---
+window.atualizarPrecoModal = () => {
+    let extra = 0;
+    // Só soma adicionais se não tiver opções de sabor (ou seja, se for lanche)
+    if (!itemAtualParaAdicionar.opcoes) {
+        listaAdicionais.forEach((add, index) => {
+            extra += add.preco * (adicionaisTemp[index] || 0);
+        });
+    }
+    const totalItem = itemAtualParaAdicionar.preco + extra;
+    document.getElementById('modal-price').innerText = `R$ ${totalItem.toFixed(2)}`;
+};
+    // --- CARRINHO LOGICA CORRIGIDA ---
+
+  window.finalizarInclusao = () => {
+    const p = itemAtualParaAdicionar;
+    
+    // 1. Validação para Bebidas/Sucos
+    if (p.opcoes && !p.sabor) {
+        alert("⚠️ Por favor, escolha um sabor!");
+        return;
+    }
+
+    let escolhidos = [];
+    let precoExtra = 0;
+    let nomeFinal = p.nome;
+
+    // 2. Se tiver sabor (Bebidas), ajusta o nome
+    if (p.sabor) {
+        nomeFinal = `${p.nome} (${p.sabor})`;
+    }
+
+    // 3. SE NÃO FOR BEBIDA, PROCESSA OS ADICIONAIS (Lanches)
+    // O segredo está em usar o objeto 'adicionaisTemp' que criamos no abrirModal
+    if (!p.opcoes) {
+        listaAdicionais.forEach((add, index) => {
+            const quantidade = adicionaisTemp[index] || 0;
+            if (quantidade > 0) {
+                escolhidos.push(`${quantidade}x ${add.nome}`);
+                precoExtra += add.preco * quantidade;
+            }
+        });
+    }
+
+    const obs = document.getElementById('item-obs').value;
+    const cartId = "cart_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+
+    // 4. Salva no carrinho com o preço total (Base + Adicionais)
+    carrinho[cartId] = { 
+        ...p, 
+        nome: nomeFinal,
+        preco: p.preco + precoExtra, // Soma o valor base + extras
+        qtd: 1, 
+        obs: obs, 
+        adicionais: escolhidos, // Aqui entram os nomes: ["1x Ovo", "2x Bacon"]
+        cartId: cartId 
+    };
+
+    window.atualizarUI(); 
+    window.closeModal();
+    window.showToast("✅ Adicionado ao pedido!");
+};
+
+    window.mudarQtd = (cartId, delta) => {
+        if (carrinho[cartId]) {
+            if (carrinho[cartId].qtd + delta > 0) {
+                carrinho[cartId].qtd += delta;
+            } else {
+                delete carrinho[cartId];
+            }
+            window.atualizarUI();
+        }
+    };
+
+    // --- RENDERIZAR UI ORIGINAL CORRIGIDA ---
+   window.atualizarUI = () => {
+    const container = document.getElementById('cart-items');
+    valorSubtotal = 0; let totalItens = 0;
+    
+    container.innerHTML = Object.values(carrinho).map(item => {
+        valorSubtotal += item.preco * item.qtd;
+        totalItens += item.qtd;
+        
+        // Se for bebida, item.adicionais estará vazio, então não aparece nada de "+ ovo/bacon"
+        const htmlAdd = item.adicionais.length > 0 ? `<br><small style="color:var(--primary)">+ ${item.adicionais.join(', ')}</small>` : '';
+        const htmlObs = item.obs ? `<br><small style="opacity:0.8; font-style:italic">Obs: ${item.obs}</small>` : '';
+
+        return `
+        <div class="cart-item">
+            <div style="flex:1">
+                <b style="text-transform: uppercase;">${item.nome}</b>
+                ${htmlAdd}
+                ${htmlObs}
+                <br><small>R$ ${item.preco.toFixed(2)}</small>
+            </div>
+            <div class="qty-controls">
+                <button class="btn-qty" onclick="window.mudarQtd('${item.cartId}', -1)">-</button>
+                <span>${item.qtd}</span>
+                <button class="btn-qty" style="background:var(--primary); color: black;" onclick="window.mudarQtd('${item.cartId}', 1)">+</button>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Atualiza totais (mantenha o restante do seu código igual...)
+    const totalEl = document.getElementById('cart-total');
+    const countEl = document.getElementById('cart-count');
+    if(totalEl) totalEl.innerText = `R$ ${(valorSubtotal + valorFrete).toFixed(2)}`;
+    if(countEl) countEl.innerText = totalItens;
+};
+
+    // --- UTILITÁRIOS ---
+
+    window.closeModal = () => document.getElementById('product-modal').style.display = 'none';
+    window.closePixModal = () => document.getElementById('pix-modal').style.display = 'none';
+    window.toggleCart = () => document.getElementById('cart-sidebar').classList.toggle('open');
+    window.showToast = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.style.visibility = "visible"; setTimeout(() => t.style.visibility = "hidden", 2000); };
+    
+    window.toggleEntrega = (delivery) => {
+        isDelivery = delivery;
+        document.getElementById('endereco-campos').style.display = delivery ? 'block' : 'none';
+        if(!delivery) valorFrete = 0; else window.updateFrete();
+        window.atualizarUI();
+    };
+
+   window.updateFrete = () => {
+    const b = document.getElementById('bairro').value;
+    
+    if (!isDelivery || !b) {
+        valorFrete = 0;
+    } else {
+        // Lógica baseada na tabela da imagem
+        switch (b) {
+            case 'Itinga-PA':
+            case 'Paulistão':
+                valorFrete = 6.00;
+                break;
+            case 'Jamel':
+                valorFrete = 4.00;
+                break;
+            case 'São João':
+                valorFrete = 3.00;
+                break;
+            case 'Paraíso':
+                valorFrete = 0.00;
+                break;
+            default:
+                // Todos os outros bairros da lista custam R$ 2,00
+                valorFrete = 2.00;
+                break;
+        }
+    }
+    window.atualizarUI();
+};
+
+    window.checkPagamento = (v) => {
+        document.getElementById('troco-box').style.display = v === 'Dinheiro' ? 'block' : 'none';
+    };
+
+    window.copyPixCode = () => {
+        navigator.clipboard.writeText(document.getElementById('pix-payload-text').innerText);
+        alert("Código Pix Copiado!");
+    };
+
+    // --- INICIALIZAR ---
+
+    // Liga o botão de confirmar do modal
+    const modalBtn = document.getElementById('modal-add-btn');
+    if(modalBtn) modalBtn.onclick = () => window.finalizarInclusao();
+
+    // Liga o form de checkout
+    const checkoutForm = document.getElementById('checkout-form');
+    if(checkoutForm) checkoutForm.onsubmit = (e) => handleCheckout(e);
+
+    // Substitua o seu handleCheckout antigo por este:
+async function handleCheckout(e) {
+    e.preventDefault();
+    if(Object.keys(carrinho).length === 0) return alert("Carrinho vazio!");
+    
+    const pgt = document.getElementById('pagamento').value;
+    const totalFloat = parseFloat(valorSubtotal + valorFrete);
+
+    if(pgt === 'Pix') {
+        const pixKey = "23078414000139"; // Sua chave CNPJ
+        
+        // Usando a sua função robusta para gerar o código
+        const pixCode = buildPixBRCode(
+            pixKey, 
+            "ZAPLANCHE", 
+            "ITINGA MA", 
+            totalFloat
+        );
+        
+        document.getElementById('pix-payload-text').innerText = pixCode;
+        document.getElementById('qrcode-img').src = `https://quickchart.io/qr?text=${encodeURIComponent(pixCode)}&size=250`;
+        document.getElementById('pix-modal').style.display = 'flex';
+    } else {
+        await window.confirmarEPublicar();
+    }
+}
+
+// --- MOTOR DO PIX (Cálculo de CRC e Estrutura) ---
+function crc16(payload) {
+    let crc = 0xFFFF;
+    const bytes = new TextEncoder().encode(payload);
+    for (const byte of bytes) {
+        crc ^= (byte << 8);
+        for (let i = 0; i < 8; i++) {
+            if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
+            else crc = (crc << 1);
+            crc &= 0xFFFF;
+        }
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+function buildPixBRCode(key, name, city, amount) {
+    const tlv = (id, val) => id + String(val.length).padStart(2, '0') + val;
+    const gui = "BR.GOV.BCB.PIX";
+
+    const mai = tlv("00", gui) + tlv("01", key);
+    const merchantAccount = tlv("26", mai);
+
+    let payload = "";
+    payload += tlv("00", "01"); 
+    payload += tlv("01", "11"); 
+    payload += merchantAccount;
+    payload += tlv("52", "0000"); 
+    payload += tlv("53", "986");  
+    if (amount > 0) payload += tlv("54", amount.toFixed(2)); 
+    payload += tlv("58", "BR"); 
+    payload += tlv("59", name.substring(0,25).toUpperCase()); 
+    payload += tlv("60", city.substring(0,15).toUpperCase()); 
+    payload += tlv("62", tlv("05", "***")); 
+    payload += "6304"; 
+
+    return payload + crc16(payload);
+}
+
+    //WHATSAPP
+window.confirmarEPublicar = async () => {
+    const n = document.getElementById('nome').value;
+    const tel = document.getElementById('telefone').value;
+    const b = document.getElementById('bairro').value;
+    const end = document.getElementById('endereco').value;
+    const pgt = document.getElementById('pagamento').value;
+    const tr = document.getElementById('troco').value;
+    const totalFloat = parseFloat(valorSubtotal + valorFrete);
+    
+    // Itens para o Painel Admin (Firebase)
+    const itensParaFirebase = Object.values(carrinho).map(i => ({
+        n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
+        q: i.qtd,
+        p: i.preco,
+        obs: i.obs || ""
+    }));
+
+let itensWpp = Object.values(carrinho).map(i => {
+    
+    let itemStr = `✅ *${i.qtd}x ${i.nome.toUpperCase()}*`;
+    
+    if (i.adicionais.length > 0) {
+        itemStr += `%0A      *+Add:* _${i.adicionais.join(', ')}_`;
+    }
+    
+    if (i.obs && i.obs.trim() !== "") {
+        itemStr += `%0A      *OBS:* ${i.obs.trim()}`;
+    }
+    
+    itemStr += `%0A      *R$ ${(i.preco * i.qtd).toFixed(2)}*`;
+    return itemStr;
+}).join('%0A%0A');
+    try {
+        // Envia para o Firebase (para aparecer no Painel Admin)
+        await addDoc(collection(db, "pedidos"), {
+            nome: n,
+            telefone: tel,
+            total: totalFloat,
+            pagamento: pgt,
+            troco: tr || "Não precisa",
+            itens: itensParaFirebase,
+            tipo: isDelivery ? "DELIVERY" : "RETIRADA",
+            origem: "SITE",
+            bairro: b,
+            endereco: end,
+            frete: valorFrete,
+            status: 'novo',
+            data: serverTimestamp() 
+        });
+
+        // Montagem da Mensagem Estilizada
+        let msg = `*🔥 NOVO PEDIDO - ZAPLANCHE 🔥*%0A`;
+        msg += `*----------------------------------------------*%0A`;
+        msg += `*👤 CLIENTE:* ${n.toUpperCase()}%0A`;
+        msg += `*📞 CONTATO:* ${tel}%0A`;
+        msg += `*----------------------------------------------*%0A%0A`;
+        
+        msg += `*🛒 ITENS DO PEDIDO:*%0A%0A${itensWpp}%0A%0A`;
+        
+        msg += `*----------------------------------------------*%0A`;
+        msg += `*📍 ENTREGA:* ${isDelivery ? '🛵 Delivery' : '🥡 Retirada'}%0A`;
+        
+        if(isDelivery) {
+            msg += `*🏠 END:* ${end}%0A`;
+            msg += `*🏘️ BAIRRO:* ${b}%0A`;
+            msg += `*🚚 TAXA:* R$ ${valorFrete.toFixed(2)}%0A`;
+        }
+        
+        msg += `*----------------------------------------------*%0A%0A`;
+        msg += `*💳 PAGAMENTO:* ${pgt}%0A`;
+        
+        if(pgt === 'Dinheiro' && tr) {
+            msg += `*💵 TROCO PARA:* R$ ${parseFloat(tr).toFixed(2)}%0A`;
+        }
+        
+        msg += `*💰 TOTAL: R$ ${totalFloat.toFixed(2)}*%0A%0A`;
+        msg += `*----------------------------------------------*%0A`;
+        msg += `_Pedido enviado via Cardápio Digital_`;
+
+        // Abre o WhatsApp com a nova formatação
+        window.open(`https://wa.me/5599992247546?text=${msg}`);
+        
+        // Sucesso e limpa carrinho
+        setTimeout(() => { location.reload(); }, 1000);
+
+    } catch (err) { 
+        alert("Erro ao enviar: " + err.message); 
+    }
+};
+
+    // Renderizar o menu e o carrinho inicial
+    window.renderMenu = (lista = produtos) => {
+        const grid = document.getElementById('menu-grid');
+        grid.innerHTML = lista.map(p => `
+            <div class="product-card">
+                <img src="${p.img}">
+                <div class="p-content">
+                    <h3>${p.nome}</h3>
+                    <span class="p-price">R$ ${p.preco.toFixed(2)}</span>
+                    <div class="p-actions" style="margin-top: auto;">
+                        <button class="btn-details" style="width:100%" onclick="window.abrirModalCustomizacao(${p.id})">ADICIONAR</button>
+                    </div>
+                </div>
+            </div>`).join('');
+    };
+
+    window.renderMenu();
+    window.atualizarUI();
+</script>
+</body>
+</html>
