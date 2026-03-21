@@ -173,7 +173,7 @@
             margin: 15px auto;
             position: sticky;
             top: 0;
-            background: rgba(255, 255, 255, 0.212);
+            background: rgba(255, 255, 255, 0.233);
             backdrop-filter: blur(10px);
             z-index: 500;
             padding: 10px;
@@ -680,7 +680,7 @@
             word-break: break-all;
             /* Quebra o texto longo para não sair da tela */
             font-size: 0.8rem;
-            background: #000;
+            background: #000000;
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 15px;
@@ -705,7 +705,7 @@
         </div>
         <div class="brand-info">
             <h1>ZAP<span>LANCHES</span></h1>
-            <marquee behavior="5" direction="left"><div class="status-badge"><span style="color:var(--green)">●</span> Aberto = 18:00 às 23:30</div></marquee>
+           <div class="status-badge"><span style="color:var(--green)">●</span> Aberto = 18:00 às 23:30</div>
         </div>
         <div class="search-container">
             <i class="fas fa-search"></i>
@@ -732,7 +732,7 @@
                 // --- ESTADO ABERTO ---
                 header.classList.remove('bg-fechado');
                 header.classList.add('bg-aberto');
-                badge.innerHTML = `<span style="color:#4ade80; font-size:35px">●</span> Aberto • 18:30 às 23:59`;
+                badge.innerHTML = `<span style="color:#24b400; font-size:35px">●</span> Aberto • 18:30 às 23:59`;
                 if (btnFinalizar) btnFinalizar.disabled = false;
             } else {
                 // --- ESTADO FECHADO ---
@@ -740,7 +740,7 @@
                 header.classList.add('bg-fechado');
 
                 let motivo = isQuinta ? "Folga hoje" : "Abrimos às 18:30";
-                badge.innerHTML = `<span style="color:#ff6b6b; font-size:35px">●</span> Fechado • ${motivo}`;
+                badge.innerHTML = `<span style="color:#ff0000; font-size:35px">●</span> Fechado • ${motivo}`;
                 if (btnFinalizar) btnFinalizar.disabled = true;
             }
         }
@@ -758,7 +758,7 @@
             <button class="tab-item" onclick="filterItems('bebidas', this)">🍹 BEBIDAS</button>
         </nav>
     </div>
-
+<span style="font-size: 10px;">*Imagem meramente ilustrativa</span>
     <main id="menu-grid" class="products-grid"></main>
 
     <div id="product-modal" class="modal" onclick="closeModal()">
@@ -820,8 +820,7 @@
                 </label>
             </div>
 
-            <div id="cart-items">
-            </div>
+            <div id="cart-items"></div>
         </div>
 
         <div class="cart-footer">
@@ -892,13 +891,14 @@
 
             <div class="footer-block footer-contact">
                 <h3><i class="fa-solid fa-headset"></i> CONTATOS:</h3>
-                <p><a href="tel:+5599992261907">(99) 99226-1907</a></p>
-                <p>Endereço: Av. João Vieira (rua da draga), S/N,<br>Vila Emanuela, Itinga do Maranhão.</p>
+                <p><a href="tel:+5599992261907">(99) 99172-4374</a></p>
+                <p>Endereço: BR - 010 (proximo o avião)<br>Paraiso, Itinga do Maranhão.</p>
             </div>
 
             <div class="footer-block footer-hours">
                 <h3>Horário de Atendimento:</h3>
-                <p>Todos os dias: 18:30 – 23:59</p>
+                <p>Seg. a Dom.: 18:30 – 23:59</p>
+                <p>Folga todas as Quinta-feiras</p>
             </div>
 
             <div class="footer-block footer-payments">
@@ -907,8 +907,9 @@
             </div>
 
         </div>
-
+        
         <div class="footer-copy">
+            <img style="width: 50px; border-radius: 50px;" src="logo2.png" alt=""><br>
             Site criado por: Carlos de Freitas Rocha.<br>
             <a style="color: #fdfdfd;" href="https://wa.me/5599992247546">Clique aqui e faça seu orçamento.</a>
         </div>
@@ -998,27 +999,28 @@
 
         const produtos = [
             // --- BURGERS GOURMET ---
-            { id: 1, nome: "Burguer Mini", preco: 21.00, cat: "art", desc: "Blend bovino grelhado (160g), queijo mussarela, salada, batata frita e molho barbecue.", img: "https://images.unsplash.com/photo-1521305916504-4a1121188589?w=400" },
-            { id: 2, nome: "Burguer Classic", preco: 22.00, cat: "art", desc: "Blend bovino (160g), mussarela, molho cheddar, salada, fritas e barbecue.", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400" },
+            { id: 1, nome: "Burguer Mini", preco: 21.00, cat: "art", desc: "Blend bovino grelhado (160g), queijo mussarela, salada, batata frita e molho barbecue.", img: "https://images.unsplash.com/photo-1508737027454-e6454ef45afd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTh8fGhhbWJ1cmdlcnxlbnwwfHwwfHx8MA%3D%3D" },
+            { id: 2, nome: "Burguer Classic", preco: 22.00, cat: "art", desc: "Blend bovino (160g), mussarela, molho cheddar, salada, fritas e barbecue.", img: "https://images.unsplash.com/photo-1508736793122-f516e3ba5569?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nzl8fGhhbWJ1cmdlcnxlbnwwfHwwfHx8MA%3D%3D" },
             { id: 3, nome: "Burguer Poleguinho", preco: 23.00, cat: "art", desc: "Blend bovino (160g), mussarela, queijo polenguinho, salada, fritas e barbecue.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400" },
             { id: 4, nome: "Burguer Pepperoni", preco: 25.00, cat: "art", desc: "Blend (160g), mussarela, cheddar, calabresa, cebola caramelizada, salada e fritas.", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400" },
             { id: 5, nome: "Burguer Cheese Bacon", preco: 26.00, cat: "art", desc: "Blend (160g), mussarela, cheddar, bacon defumado, cebola caramelizada, salada e fritas.", img: "https://images.unsplash.com/photo-1700835880532-6a66115168ae?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
             { id: 6, nome: "Burguer Double", preco: 32.00, cat: "art", desc: "2 Blends (160g), mussarela, cheddar, bacon, cebola caramelizada, salada e fritas.", img: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=400" },
 
             // --- BURGERS TRADICIONAIS ---
-            { id: 7, nome: "Zap Quente", preco: 6.00, cat: "burgers", desc: "Pão com gergelim, queijo e presunto.", img: "https://plus.unsplash.com/premium_photo-1684534125391-9e01a39570d2?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+            
+            { id: 7, nome: "Zap Quente", preco: 6.00, cat: "burgers", desc: "Pão com gergelim, queijo e presunto.", img: "https://images.unsplash.com/photo-1750515422413-25ec41b09d2e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fG1pc3RvJTIwcXVlbnRlJTIwc2FuZHVpY2hlfGVufDB8fDB8fHww" },
             { id: 8, nome: "Zap X-Burguer", preco: 12.00, cat: "burgers", desc: "Pão, salada, carne, queijo e batata palha.", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400" },
             { id: 9, nome: "Zap Egg", preco: 14.00, cat: "burgers", desc: "Pão, salada, carne, queijo, ovo e batata palha.", img: "https://images.unsplash.com/photo-1547584370-2cc98b8b8dc8?w=400" },
             { id: 10, nome: "Zap Bacon", preco: 16.00, cat: "burgers", desc: "Pão, salada, carne, queijo, bacon, ovo e batata palha.", img: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400" },
             { id: 11, nome: "Zap Calabresa", preco: 14.00, cat: "burgers", desc: "Pão, salada, carne, queijo, calabresa e batata palha.", img: "https://images.unsplash.com/photo-1566706541274-d35d8fd14160?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTEwfHxoYW1iJUMzJUJBcmd1ZXJ8ZW58MHx8MHx8fDA%3D" },
             { id: 12, nome: "Zap Salada Especial", preco: 15.00, cat: "burgers", desc: "Pão, salada, carne, queijo, presunto, ovo, milho e batata palha.", img: "https://images.unsplash.com/photo-1512152272829-e3139592d56f?w=400" },
             { id: 13, nome: "Zap Tudo", preco: 20.00, cat: "burgers", desc: "Pão, salada, carne, queijo, presunto, ovo, bacon, salsicha, cheddar, milho e palha.", img: "https://images.unsplash.com/photo-1648999599490-9348c7f686e5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjk4fHxoYW1iJUMzJUJBcmd1ZXJ8ZW58MHx8MHx8fDA%3D" },
-            { id: 14, nome: "Zap Broca", preco: 25.00, cat: "burgers", desc: "Pão, salada, 2 carnes, queijo, presunto, 2 ovos, bacon, salsicha, cheddar, milho e palha.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400" },
-            { id: 15, nome: "Zap Frango", preco: 20.00, cat: "burgers", desc: "Pão, salada, filé de frango, queijo, presunto, cheddar e batata palha.", img: "https://images.unsplash.com/photo-1610614819513-58e34989848b?w=400" },
-            { id: 16, nome: "Zap Filé", preco: 22.00, cat: "burgers", desc: "Pão, salada, filé de gado, queijo, presunto, cheddar e batata palha.", img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=400" },
+            { id: 14, nome: "Zap Broca", preco: 25.00, cat: "burgers", desc: "Pão, salada, 2 carnes, queijo, presunto, 2 ovos, bacon, salsicha, cheddar, milho e palha.", img: "https://images.unsplash.com/photo-1544037803-ed377ec9a75e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8ODR8fGhhbWJ1cmdlcnxlbnwwfHwwfHx8MA%3D%3D" },
+            { id: 15, nome: "Zap Frango", preco: 20.00, cat: "burgers", desc: "Pão, salada, filé de frango, queijo, presunto, cheddar e batata palha.", img: "https://images.unsplash.com/photo-1645024679624-e8351ac98f01?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjJ8fGhhbWJ1cmdlciUyMGRlJTIwZnJhbmdvfGVufDB8fDB8fHww" },
+            { id: 16, nome: "Zap Filé", preco: 22.00, cat: "burgers", desc: "Pão, salada, filé de gado, queijo, presunto, cheddar e batata palha.", img: "https://images.unsplash.com/photo-1667329829058-ac191ba4a905?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjN8fGhhbWJ1cmdlcnxlbnwwfHwwfHx8MA%3D%3D" },
 
             // --- PORÇÕES ---
-            { id: 17, nome: "Batata Frita", preco: 17.00, cat: "porcoes", desc: "Porção individual de batata frita crocante.", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400" },
+            { id: 17, nome: "Batata Frita", preco: 17.00, cat: "burgers", desc: "Porção individual de batata frita crocante.", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400" },
 
             // --- SUCOS ---
             // Adicione/Substitua no seu array de produtos:
@@ -1036,7 +1038,7 @@
             { nome: "Cebola Caramelizada", preco: 5.00 },
             { nome: "Bacon Defumado", preco: 6.00 },
             { nome: "Calabresa", preco: 5.00 },
-            { nome: "Carne Extra (Tradicional)", preco: 6.00 },
+            { nome: "Carne Extra", preco: 6.00 },
             { id_art: "blend", nome: "Blend Bovino (160g)", preco: 10.00 },
             { nome: "Presunto", preco: 4.00 },
             { nome: "Salsicha", preco: 3.00 },
@@ -1499,7 +1501,7 @@
                 msg += `_Pedido via Cardápio Digital_`;
 
                 // Abre o WhatsApp com a nova formatação
-                window.open(`https://wa.me/5599992247546?text=${msg}`);
+                window.open(`https://wa.me/5599991724374?text=${msg}`);
 
                 // Sucesso e limpa carrinho
                 setTimeout(() => { location.reload(); }, 1000);
@@ -1527,6 +1529,16 @@
 
         window.renderMenu();
         window.atualizarUI();
+
+        // Bloqueios de segurança
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
+    if (e.key === 'F12') { e.preventDefault(); }
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.ctrlKey && event.shiftKey && event.key === 'I') { event.preventDefault(); }
+  });
+  document.addEventListener('contextmenu', function (event) { event.preventDefault(); });
     </script>
 </body>
 
