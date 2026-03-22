@@ -835,46 +835,48 @@
                 <span id="cart-total">R$ 0,00</span>
             </div>
 
-            <form id="checkout-form">
-                <input type="text" id="nome" placeholder="Seu Nome Completo" required>
-                <input type="tel" id="telefone" placeholder="Telefone / WhatsApp" required>
+           <form id="checkout-form">
+    <input type="text" id="nome" placeholder="Seu Nome Completo" required>
+    <input type="tel" id="telefone" placeholder="Telefone / WhatsApp" required>
 
-                <div id="endereco-campos">
-                    <select id="bairro" onchange="updateFrete()">
-                        <option value="">Selecione seu Bairro</option>
-                        <option value="Itinga-PA">Itinga-PA (R$ 6,00)</option>
-                        <option value="Paulistão">Paulistão (R$ 6,00)</option>
-                        <option value="Jamel">Jamel (R$ 4,00)</option>
-                        <option value="São João">São João (R$ 3,00)</option>
-                        <option value="São Sebastião">São Sebastião (R$ 2,00)</option>
-                        <option value="Vila Samuel">Vila Samuel (R$ 2,00)</option>
-                        <option value="Vila Emanuela">Vila Emanuela (R$ 2,00)</option>
-                        <option value="Célio Brás">Célio Brás (R$ 2,00)</option>
-                        <option value="Centro">Centro (R$ 2,00)</option>
-                        <option value="Coqueiral">Coqueiral (R$ 2,00)</option>
-                        <option value="Jardim Planalto">Jardim Planalto (R$ 2,00)</option>
-                        <option value="Parque Primavera">Parque Primavera (R$ 2,00)</option>
-                        <option value="Vila Pimentel 2">Vila Pimentel 2 (R$ 2,00)</option>
-                        <option value="Loteamento Brasil">Loteamento Brasil (R$ 2,00)</option>
-                        <option value="Paraíso">Paraíso (GRÁTIS)</option>
-                    </select>
-                    <input type="text" id="endereco" placeholder="Endereço: Rua, número, apto...">
-                </div>
+    <div id="endereco-campos">
+        <select id="bairro" onchange="updateFrete()" required>
+            <option value="">Selecione seu Bairro *</option> 
+            <option value="Itinga-PA">Itinga-PA (R$ 6,00)</option>
+            <option value="Paulistão">Paulistão (R$ 6,00)</option>
+            <option value="Jamel">Jamel (R$ 4,00)</option>
+            <option value="São João">São João (R$ 3,00)</option>
+            <option value="São Sebastião">São Sebastião (R$ 2,00)</option>
+            <option value="Vila Samuel">Vila Samuel (R$ 2,00)</option>
+            <option value="Vila Emanuela">Vila Emanuela (R$ 2,00)</option>
+            <option value="Célio Brás">Célio Brás (R$ 2,00)</option>
+            <option value="Centro">Centro (R$ 2,00)</option>
+            <option value="Coqueiral">Coqueiral (R$ 2,00)</option>
+            <option value="Jardim Planalto">Jardim Planalto (R$ 2,00)</option>
+            <option value="Parque Primavera">Parque Primavera (R$ 2,00)</option>
+            <option value="Vila Pimentel 2">Vila Pimentel 2 (R$ 2,00)</option>
+            <option value="Loteamento Brasil">Loteamento Brasil (R$ 2,00)</option>
+            <option value="Paraíso">Paraíso (GRÁTIS)</option>
+        </select>
+       
+        <input type="text" id="endereco" placeholder="Endereço: Rua, número, apto..." required>
+    </div>
 
-                <select id="pagamento" onchange="checkPagamento(this.value)" required>
-                    <option value="Pix">Pagar com Pix (Online)</option>
-                    <option value="Cartão">Cartão (Na entrega)</option>
-                    <option value="Dinheiro">Dinheiro (Na entrega)</option>
-                </select>
+    <select id="pagamento" onchange="checkPagamento(this.value)" required>
+        <option value="">Forma de Pagamento *</option>
+        <option value="Pix">Pagar com Pix (Online)</option>
+        <option value="Cartão">Cartão (Na entrega)</option>
+        <option value="Dinheiro">Dinheiro (Na entrega)</option>
+    </select>
 
-                <div id="troco-box" style="display:none">
-                    <input type="number" id="troco" placeholder="Troco para quanto?">
-                </div>
+    <div id="troco-box" style="display:none">
+        <input type="number" id="troco" placeholder="Troco para quanto?">
+    </div>
 
-                <button type="submit" class="btn-finalizar">
-                    FINALIZAR PEDIDO
-                </button>
-            </form>
+    <button type="submit" class="btn-finalizar">
+        FINALIZAR PEDIDO
+    </button>
+</form>
         </div>
     </aside>
 
@@ -1424,93 +1426,154 @@
         }
 
         //WHATSAPP
-        window.confirmarEPublicar = async () => {
-            const n = document.getElementById('nome').value;
-            const tel = document.getElementById('telefone').value;
-            const b = document.getElementById('bairro').value;
-            const end = document.getElementById('endereco').value;
-            const pgt = document.getElementById('pagamento').value;
-            const tr = document.getElementById('troco').value;
-            const totalFloat = parseFloat(valorSubtotal + valorFrete);
+      window.confirmarEPublicar = async () => {
+    // 1. CAPTURA DE VALORES
+    const n = document.getElementById('nome').value.trim();
+    const tel = document.getElementById('telefone').value.trim();
+    const b = document.getElementById('bairro').value;
+    const end = document.getElementById('endereco').value.trim();
+    const pgt = document.getElementById('pagamento').value;
+    const tr = document.getElementById('troco').value;
+    const totalFloat = parseFloat(valorSubtotal + valorFrete);
 
-            // Itens para o Painel Admin (Firebase)
-            const itensParaFirebase = Object.values(carrinho).map(i => ({
-                n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
-                q: i.qtd,
-                p: i.preco,
-                obs: i.obs || ""
-            }));
+    // 2. VALIDAÇÃO DE CAMPOS OBRIGATÓRIOS (CONTRA ESPERTINHOS)
+    if (!n || !tel) {
+        alert("⚠️ Por favor, preencha seu Nome e Telefone!");
+        return;
+    }
 
-            let itensWpp = Object.values(carrinho).map(i => {
+    if (isDelivery) {
+        if (!b || b === "") {
+            alert("⚠️ ERRO: Você deve selecionar um BAIRRO para calcular o frete!");
+            document.getElementById('bairro').focus();
+            return;
+        }
+        if (!end) {
+            alert("⚠️ Por favor, preencha seu ENDEREÇO completo!");
+            document.getElementById('endereco').focus();
+            return;
+        }
+    }
 
-                let itemStr = `✅ *${i.qtd}x ${i.nome.toUpperCase()}*`;
+    if (Object.keys(carrinho).length === 0) {
+        alert("⚠️ Seu carrinho está vazio!");
+        return;
+    }
 
-                if (i.adicionais.length > 0) {
-                    itemStr += `%0A      *+Add:* _${i.adicionais.join(', ')}_`;
-                }
+    try {
+        const timestamp = serverTimestamp();
+        const pedidoAgrupadorID = "ZAP-" + Date.now(); // ID para ligar as comandas ao mesmo pedido
 
-                if (i.obs && i.obs.trim() !== "") {
-                    itemStr += `%0A      *OBS:* ${i.obs.trim()}`;
-                }
+        // 3. SEPARAÇÃO DE ITENS POR CATEGORIA (COZINHAS)
+        const itensTradicionais = Object.values(carrinho).filter(i => i.cat === 'burgers');
+        const itensArtesanais = Object.values(carrinho).filter(i => i.cat === 'art');
+        const outrosItens = Object.values(carrinho).filter(i => i.cat !== 'burgers' && i.cat !== 'art');
 
-                itemStr += `%0A      *R$ ${(i.preco * i.qtd).toFixed(2)}*`;
-                return itemStr;
-            }).join('%0A%0A');
-            try {
-                // Envia para o Firebase (para aparecer no Painel Admin)
-                await addDoc(collection(db, "pedidos"), {
-                    nome: n,
-                    telefone: tel,
-                    total: totalFloat,
-                    pagamento: pgt,
-                    troco: tr || "Não precisa",
-                    itens: itensParaFirebase,
-                    tipo: isDelivery ? "DELIVERY" : "RETIRADA",
-                    origem: "SITE",
-                    bairro: b,
-                    endereco: end,
-                    frete: valorFrete,
-                    status: 'novo',
-                    data: serverTimestamp()
-                });
+        // 4. ENVIO DO PEDIDO COMPLETO (CAIXA / PAINEL ADMIN)
+        const itensParaFirebase = Object.values(carrinho).map(i => ({
+            n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
+            q: i.qtd,
+            p: i.preco,
+            obs: i.obs || ""
+        }));
 
-                // Montagem da Mensagem Estilizada
-                let msg = `*🔥 PEDIDO - ZAPLANCHES 🔥*%0A`;
-                msg += `*----------------------------------------*%0A`;
-                msg += `*CLIENTE:* ${n.toUpperCase()}%0A`;
-                msg += `*CONTATO:* ${tel}%0A`;
-                msg += `*----------------------------------------*%0A%0A`;
-                msg += `*🛒 ITENS DO PEDIDO:*%0A%0A${itensWpp}%0A%0A`;
-                msg += `*----------------------------------------*%0A`;
-                msg += `*ENTREGA:* ${isDelivery ? ' Delivery' : ' Retirada'}%0A`;
+        await addDoc(collection(db, "pedidos"), {
+            pedidoID: pedidoAgrupadorID,
+            nome: n,
+            telefone: tel,
+            total: totalFloat,
+            pagamento: pgt,
+            troco: tr || "Não precisa",
+            itens: itensParaFirebase,
+            tipo: isDelivery ? "DELIVERY" : "RETIRADA",
+            origem: "SITE", // Cupom do Caixa
+            bairro: b,
+            endereco: end,
+            frete: valorFrete,
+            status: 'novo',
+            data: timestamp
+        });
 
-                if (isDelivery) {
-                    msg += `*END:* ${end}%0A`;
-                    msg += `*BAIRRO:* ${b}%0A`;
-                    msg += `*TAXA:* R$ ${valorFrete.toFixed(2)}%0A`;
-                }
-                msg += `*----------------------------------------*%0A%0A`;
-                msg += `*PAGAMENTO:* ${pgt}%0A`;
+        // 5. ENVIO COMANDA TRADICIONAL (SÓ SE HOUVER)
+        if (itensTradicionais.length > 0) {
+            await addDoc(collection(db, "pedidos"), {
+                pedidoID: pedidoAgrupadorID,
+                nome: n,
+                itens: itensTradicionais.map(i => ({
+                    n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
+                    q: i.qtd,
+                    obs: i.obs || ""
+                })),
+                origem: "COZINHA_TRADICIONAL",
+                status: 'imprimir',
+                data: timestamp
+            });
+        }
 
-                if (pgt === 'Dinheiro' && tr) {
-                    msg += `*💵TROCO PARA:* R$ ${parseFloat(tr).toFixed(2)}%0A`;
-                }
+        // 6. ENVIO COMANDA ARTESANAL (SÓ SE HOUVER)
+        if (itensArtesanais.length > 0) {
+            await addDoc(collection(db, "pedidos"), {
+                pedidoID: pedidoAgrupadorID,
+                nome: n,
+                itens: itensArtesanais.map(i => ({
+                    n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
+                    q: i.qtd,
+                    obs: i.obs || ""
+                })),
+                origem: "COZINHA_ARTESANAL",
+                status: 'imprimir',
+                data: timestamp
+            });
+        }
 
-                msg += `*💰 TOTAL: R$ ${totalFloat.toFixed(2)}*%0A%0A`;
-                msg += `*----------------------------------------*%0A`;
-                msg += `_Pedido via Cardápio Digital_`;
+        // 7. MONTAGEM DA MENSAGEM WHATSAPP (CLIENTE)
+        let itensWpp = Object.values(carrinho).map(i => {
+            let itemStr = `✅ *${i.qtd}x ${i.nome.toUpperCase()}*`;
+            if (i.adicionais.length > 0) itemStr += `%0A      *+Add:* _${i.adicionais.join(', ')}_`;
+            if (i.obs && i.obs.trim() !== "") itemStr += `%0A      *OBS:* ${i.obs.trim()}`;
+            itemStr += `%0A      *R$ ${(i.preco * i.qtd).toFixed(2)}*`;
+            return itemStr;
+        }).join('%0A%0A');
 
-                // Abre o WhatsApp com a nova formatação
-                window.open(`https://wa.me/5599991724374?text=${msg}`);
+        let msg = `*🔥 PEDIDO - ZAPLANCHES 🔥*%0A`;
+        msg += `*----------------------------------------*%0A`;
+        msg += `*CLIENTE:* ${n.toUpperCase()}%0A`;
+        msg += `*CONTATO:* ${tel}%0A`;
+        msg += `*----------------------------------------*%0A%0A`;
+        msg += `*🛒 ITENS DO PEDIDO:*%0A%0A${itensWpp}%0A%0A`;
+        msg += `*----------------------------------------*%0A`;
+        msg += `*ENTREGA:* ${isDelivery ? ' Delivery' : ' Retirada'}%0A`;
 
-                // Sucesso e limpa carrinho
-                setTimeout(() => { location.reload(); }, 1000);
+        if (isDelivery) {
+            msg += `*END:* ${end}%0A`;
+            msg += `*BAIRRO:* ${b}%0A`;
+            msg += `*TAXA:* R$ ${valorFrete.toFixed(2)}%0A`;
+        }
+        msg += `*----------------------------------------*%0A%0A`;
+        msg += `*PAGAMENTO:* ${pgt}%0A`;
 
-            } catch (err) {
-                alert("Erro ao enviar: " + err.message);
-            }
-        };
+        if (pgt === 'Dinheiro' && tr) {
+            msg += `*💵TROCO PARA:* R$ ${parseFloat(tr).toFixed(2)}%0A`;
+        }
 
+        msg += `*💰 TOTAL: R$ ${totalFloat.toFixed(2)}*%0A%0A`;
+        msg += `*----------------------------------------*%0A`;
+        msg += `_Pedido via Cardápio Digital_%0A`;
+        msg += `*POR FAVOR, ENVIE O COMPROVANTE CASO SEJA PIX!*`;
+
+        // 8. FINALIZAÇÃO
+        window.open(`https://wa.me/5599991724374?text=${msg}`);
+        
+        setTimeout(() => { 
+            carrinho = {}; // Limpa o carrinho local
+            location.reload(); 
+        }, 1000);
+
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao enviar pedido: " + err.message);
+    }
+};
         // Renderizar o menu e o carrinho inicial
         window.renderMenu = (lista = produtos) => {
             const grid = document.getElementById('menu-grid');
