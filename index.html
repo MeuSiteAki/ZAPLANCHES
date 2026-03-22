@@ -1361,73 +1361,92 @@
         if (checkoutForm) checkoutForm.onsubmit = (e) => handleCheckout(e);
 
         // Substitua o seu handleCheckout antigo por este:
-        async function handleCheckout(e) {
-            e.preventDefault();
-            if (Object.keys(carrinho).length === 0) return alert("Carrinho vazio!");
+// --- VARIÁVEL DE CONTROLE GLOBAL (IMPORTANTE: DEVE FICAR FORA DAS FUNÇÕES) ---
+let enviandoPedido = false;
 
-            const pgt = document.getElementById('pagamento').value;
-            const totalFloat = parseFloat(valorSubtotal + valorFrete);
+// --- FUNÇÃO DE CHECKOUT ---
+async function handleCheckout(e) {
+    e.preventDefault();
 
-            if (pgt === 'Pix') {
-                const pixKey = "23078414000139"; // Sua chave CNPJ
+    // Trava para evitar múltiplos cliques
+    if (enviandoPedido) return;
 
-                // Usando a sua função robusta para gerar o código
-                const pixCode = buildPixBRCode(
-                    pixKey,
-                    "ZAPLANCHE",
-                    "ITINGA MA",
-                    totalFloat
-                );
+    if (Object.keys(carrinho).length === 0) {
+        alert("⚠️ Seu carrinho está vazio!");
+        return;
+    }
 
-                document.getElementById('pix-payload-text').innerText = pixCode;
-                document.getElementById('qrcode-img').src = `https://quickchart.io/qr?text=${encodeURIComponent(pixCode)}&size=250`;
-                document.getElementById('pix-modal').style.display = 'flex';
-            } else {
-                await window.confirmarEPublicar();
-            }
+    const pgt = document.getElementById('pagamento').value;
+    const totalFloat = parseFloat(valorSubtotal + valorFrete);
+
+    // Validação de segurança para o valor total
+    if (isNaN(totalFloat) || totalFloat <= 0) {
+        alert("⚠️ Erro no cálculo do valor total. Por favor, reinicie o pedido.");
+        return;
+    }
+
+    if (pgt === 'Pix') {
+        const pixKey = "23078414000139"; // Sua chave CNPJ
+
+        // Gera o código Pix
+        const pixCode = buildPixBRCode(
+            pixKey,
+            "ZAPLANCHE",
+            "ITINGA MA",
+            totalFloat
+        );
+
+        document.getElementById('pix-payload-text').innerText = pixCode;
+        document.getElementById('qrcode-img').src = `https://quickchart.io/qr?text=${encodeURIComponent(pixCode)}&size=250`;
+        document.getElementById('pix-modal').style.display = 'flex';
+    } else {
+        await window.confirmarEPublicar();
+    }
+}
+
+// --- MOTOR DO PIX (Cálculo de CRC e Estrutura) ---
+function crc16(payload) {
+    let crc = 0xFFFF;
+    const bytes = new TextEncoder().encode(payload);
+    for (const byte of bytes) {
+        crc ^= (byte << 8);
+        for (let i = 0; i < 8; i++) {
+            if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
+            else crc = (crc << 1);
+            crc &= 0xFFFF;
         }
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+}
 
-        // --- MOTOR DO PIX (Cálculo de CRC e Estrutura) ---
-        function crc16(payload) {
-            let crc = 0xFFFF;
-            const bytes = new TextEncoder().encode(payload);
-            for (const byte of bytes) {
-                crc ^= (byte << 8);
-                for (let i = 0; i < 8; i++) {
-                    if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
-                    else crc = (crc << 1);
-                    crc &= 0xFFFF;
-                }
-            }
-            return crc.toString(16).toUpperCase().padStart(4, '0');
-        }
+function buildPixBRCode(key, name, city, amount) {
+    const tlv = (id, val) => id + String(val.length).padStart(2, '0') + val;
+    const gui = "BR.GOV.BCB.PIX";
+    const mai = tlv("00", gui) + tlv("01", key);
+    const merchantAccount = tlv("26", mai);
 
-        function buildPixBRCode(key, name, city, amount) {
-            const tlv = (id, val) => id + String(val.length).padStart(2, '0') + val;
-            const gui = "BR.GOV.BCB.PIX";
+    let payload = "";
+    payload += tlv("00", "01");
+    payload += tlv("01", "11");
+    payload += merchantAccount;
+    payload += tlv("52", "0000");
+    payload += tlv("53", "986");
+    if (amount > 0) payload += tlv("54", amount.toFixed(2));
+    payload += tlv("58", "BR");
+    payload += tlv("59", name.substring(0, 25).toUpperCase());
+    payload += tlv("60", city.substring(0, 15).toUpperCase());
+    payload += tlv("62", tlv("05", "***"));
+    payload += "6304";
 
-            const mai = tlv("00", gui) + tlv("01", key);
-            const merchantAccount = tlv("26", mai);
+    return payload + crc16(payload);
+}
 
-            let payload = "";
-            payload += tlv("00", "01");
-            payload += tlv("01", "11");
-            payload += merchantAccount;
-            payload += tlv("52", "0000");
-            payload += tlv("53", "986");
-            if (amount > 0) payload += tlv("54", amount.toFixed(2));
-            payload += tlv("58", "BR");
-            payload += tlv("59", name.substring(0, 25).toUpperCase());
-            payload += tlv("60", city.substring(0, 15).toUpperCase());
-            payload += tlv("62", tlv("05", "***"));
-            payload += "6304";
+// --- FINALIZAÇÃO (FIREBASE + WHATSAPP) ---
+window.confirmarEPublicar = async () => {
+    // 1. TRAVA DE SEGURANÇA CONTRA CLIQUE DUPLO
+    if (enviandoPedido) return;
 
-            return payload + crc16(payload);
-        }
-
-        //WHATSAPP
-      window.confirmarEPublicar = async () => {
-    // 1. CAPTURA DE VALORES
+    // CAPTURA DE VALORES
     const n = document.getElementById('nome').value.trim();
     const tel = document.getElementById('telefone').value.trim();
     const b = document.getElementById('bairro').value;
@@ -1436,7 +1455,7 @@
     const tr = document.getElementById('troco').value;
     const totalFloat = parseFloat(valorSubtotal + valorFrete);
 
-    // 2. VALIDAÇÃO DE CAMPOS OBRIGATÓRIOS (CONTRA ESPERTINHOS)
+    // 2. VALIDAÇÃO DE CAMPOS OBRIGATÓRIOS
     if (!n || !tel) {
         alert("⚠️ Por favor, preencha seu Nome e Telefone!");
         return;
@@ -1455,19 +1474,21 @@
         }
     }
 
-    if (Object.keys(carrinho).length === 0) {
-        alert("⚠️ Seu carrinho está vazio!");
+    if (Object.keys(carrinho).length === 0 || isNaN(totalFloat)) {
+        alert("⚠️ Seu carrinho está vazio ou inválido!");
         return;
     }
 
+    // ATIVA A TRAVA PARA O BOTÃO NÃO FUNCIONAR DE NOVO
+    enviandoPedido = true;
+
     try {
         const timestamp = serverTimestamp();
-        const pedidoAgrupadorID = "ZAP-" + Date.now(); // ID para ligar as comandas ao mesmo pedido
+        const pedidoAgrupadorID = "ZAP-" + Date.now();
 
         // 3. SEPARAÇÃO DE ITENS POR CATEGORIA (COZINHAS)
         const itensTradicionais = Object.values(carrinho).filter(i => i.cat === 'burgers');
         const itensArtesanais = Object.values(carrinho).filter(i => i.cat === 'art');
-        const outrosItens = Object.values(carrinho).filter(i => i.cat !== 'burgers' && i.cat !== 'art');
 
         // 4. ENVIO DO PEDIDO COMPLETO (CAIXA / PAINEL ADMIN)
         const itensParaFirebase = Object.values(carrinho).map(i => ({
@@ -1479,14 +1500,14 @@
 
         await addDoc(collection(db, "pedidos"), {
             pedidoID: pedidoAgrupadorID,
-            nome: n,
+            nome: n.toUpperCase(),
             telefone: tel,
-            total: totalFloat,
+            total: totalFloat.toFixed(2), // Salva como string formatada para segurança
             pagamento: pgt,
             troco: tr || "Não precisa",
             itens: itensParaFirebase,
             tipo: isDelivery ? "DELIVERY" : "RETIRADA",
-            origem: "SITE", // Cupom do Caixa
+            origem: "SITE",
             bairro: b,
             endereco: end,
             frete: valorFrete,
@@ -1498,7 +1519,7 @@
         if (itensTradicionais.length > 0) {
             await addDoc(collection(db, "pedidos"), {
                 pedidoID: pedidoAgrupadorID,
-                nome: n,
+                nome: n.toUpperCase(),
                 itens: itensTradicionais.map(i => ({
                     n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
                     q: i.qtd,
@@ -1514,7 +1535,7 @@
         if (itensArtesanais.length > 0) {
             await addDoc(collection(db, "pedidos"), {
                 pedidoID: pedidoAgrupadorID,
-                nome: n,
+                nome: n.toUpperCase(),
                 itens: itensArtesanais.map(i => ({
                     n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
                     q: i.qtd,
@@ -1526,7 +1547,7 @@
             });
         }
 
-        // 7. MONTAGEM DA MENSAGEM WHATSAPP (CLIENTE)
+        // 7. MONTAGEM DA MENSAGEM WHATSAPP
         let itensWpp = Object.values(carrinho).map(i => {
             let itemStr = `✅ *${i.qtd}x ${i.nome.toUpperCase()}*`;
             if (i.adicionais.length > 0) itemStr += `%0A      *+Add:* _${i.adicionais.join(', ')}_`;
@@ -1536,42 +1557,28 @@
         }).join('%0A%0A');
 
         let msg = `*🔥 PEDIDO - ZAPLANCHES 🔥*%0A`;
-        msg += `*----------------------------------------*%0A`;
         msg += `*CLIENTE:* ${n.toUpperCase()}%0A`;
-        msg += `*CONTATO:* ${tel}%0A`;
-        msg += `*----------------------------------------*%0A%0A`;
-        msg += `*🛒 ITENS DO PEDIDO:*%0A%0A${itensWpp}%0A%0A`;
-        msg += `*----------------------------------------*%0A`;
-        msg += `*ENTREGA:* ${isDelivery ? ' Delivery' : ' Retirada'}%0A`;
-
-        if (isDelivery) {
-            msg += `*END:* ${end}%0A`;
-            msg += `*BAIRRO:* ${b}%0A`;
-            msg += `*TAXA:* R$ ${valorFrete.toFixed(2)}%0A`;
-        }
-        msg += `*----------------------------------------*%0A%0A`;
+        msg += `*CONTATO:* ${tel}%0A%0A`;
+        msg += `*🛒 ITENS:*%0A${itensWpp}%0A%0A`;
+        msg += `*ENTREGA:* ${isDelivery ? 'Delivery' : 'Retirada'}%0A`;
+        if (isDelivery) msg += `*END:* ${end} (${b})%0A`;
         msg += `*PAGAMENTO:* ${pgt}%0A`;
-
-        if (pgt === 'Dinheiro' && tr) {
-            msg += `*💵TROCO PARA:* R$ ${parseFloat(tr).toFixed(2)}%0A`;
-        }
-
+        if (pgt === 'Dinheiro' && tr) msg += `*💵 TROCO PARA:* R$ ${parseFloat(tr).toFixed(2)}%0A`;
         msg += `*💰 TOTAL: R$ ${totalFloat.toFixed(2)}*%0A%0A`;
-        msg += `*----------------------------------------*%0A`;
-        msg += `_Pedido via Cardápio Digital_%0A`;
-        msg += `*POR FAVOR, ENVIE O COMPROVANTE CASO SEJA PIX!*`;
+        msg += `*POR FAVOR, ENVIE O COMPROVANTE SE FOR PIX!*`;
 
         // 8. FINALIZAÇÃO
         window.open(`https://wa.me/5599991724374?text=${msg}`);
         
         setTimeout(() => { 
-            carrinho = {}; // Limpa o carrinho local
+            carrinho = {}; 
             location.reload(); 
         }, 1000);
 
     } catch (err) {
+        enviandoPedido = false; // Libera a trava em caso de erro para tentar de novo
         console.error(err);
-        alert("Erro ao enviar pedido: " + err.message);
+        alert("❌ Erro ao enviar pedido: " + err.message);
     }
 };
         // Renderizar o menu e o carrinho inicial
@@ -1605,4 +1612,4 @@
     </script>
 </body>
 
-</html>
+</html>async function handleCheckout
