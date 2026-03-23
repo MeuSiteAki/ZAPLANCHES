@@ -1305,13 +1305,35 @@
         window.toggleCart = () => document.getElementById('cart-sidebar').classList.toggle('open');
         window.showToast = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.style.visibility = "visible"; setTimeout(() => t.style.visibility = "hidden", 2000); };
 
-        window.toggleEntrega = (delivery) => {
-            isDelivery = delivery;
-            document.getElementById('endereco-campos').style.display = delivery ? 'block' : 'none';
-            if (!delivery) valorFrete = 0; else window.updateFrete();
-            window.atualizarUI();
-        };
+       window.toggleEntrega = (delivery) => {
+    isDelivery = delivery;
+    
+    const enderecoCampos = document.getElementById('endereco-campos');
+    const bairroSelect = document.getElementById('bairro');
+    const enderecoInput = document.getElementById('endereco');
 
+    if (delivery) {
+        // Modo Delivery: Mostra e torna obrigatório
+        enderecoCampos.style.display = 'block';
+        bairroSelect.required = true;
+        enderecoInput.required = true;
+        window.updateFrete();
+    } else {
+        // Modo Retirada: Esconde e remove a obrigatoriedade
+        enderecoCampos.style.display = 'none';
+        bairroSelect.required = false;
+        enderecoInput.required = false;
+        
+        // Limpa os valores para não enviar lixo no pedido
+        bairroSelect.value = "";
+        enderecoInput.value = "";
+        valorFrete = 0;
+    }
+    
+    window.atualizarUI();
+};
+
+    // frete
         window.updateFrete = () => {
             const b = document.getElementById('bairro').value;
 
@@ -1357,12 +1379,10 @@
         const modalBtn = document.getElementById('modal-add-btn');
         if (modalBtn) modalBtn.onclick = () => window.finalizarInclusao();
 
-        // Liga o form de checkout
+        
         const checkoutForm = document.getElementById('checkout-form');
         if (checkoutForm) checkoutForm.onsubmit = (e) => handleCheckout(e);
 
-        // Substitua o seu handleCheckout antigo por este:
-// --- VARIÁVEL DE CONTROLE GLOBAL (IMPORTANTE: DEVE FICAR FORA DAS FUNÇÕES) ---
 let enviandoPedido = false;
 
 // --- FUNÇÃO DE CHECKOUT ---
