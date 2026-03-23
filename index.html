@@ -1044,7 +1044,8 @@
             { id_art: "blend", nome: "Blend Bovino (160g)", preco: 10.00 },
             { nome: "Presunto", preco: 4.00 },
             { nome: "Salsicha", preco: 3.00 },
-            { nome: "Filé Frango/Gado", preco: 10.00 },
+            { nome: "Filé Gado", preco: 10.00 },
+            { nome: "Filé Frango", preco: 10.00 },
             { nome: "Molho Extra", preco: 3.00 }
         ];
 
@@ -1487,12 +1488,13 @@ window.confirmarEPublicar = async () => {
         const pedidoAgrupadorID = "ZAP-" + Date.now();
 
         // 3. SEPARAÇÃO DE ITENS POR CATEGORIA (COZINHAS)
+        // Bebidas ficam de fora aqui (não são 'burgers' nem 'art')
         const itensTradicionais = Object.values(carrinho).filter(i => i.cat === 'burgers');
         const itensArtesanais = Object.values(carrinho).filter(i => i.cat === 'art');
 
-        // 4. ENVIO DO PEDIDO COMPLETO (CAIXA / PAINEL ADMIN)
+        // 4. ENVIO DO PEDIDO COMPLETO (CAIXA / PAINEL ADMIN / CUPOM CLIENTE)
         const itensParaFirebase = Object.values(carrinho).map(i => ({
-            n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
+            n: (i.adicionais && i.adicionais.length > 0) ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
             q: i.qtd,
             p: i.preco,
             obs: i.obs || ""
@@ -1502,10 +1504,10 @@ window.confirmarEPublicar = async () => {
             pedidoID: pedidoAgrupadorID,
             nome: n.toUpperCase(),
             telefone: tel,
-            total: totalFloat.toFixed(2), // Salva como string formatada para segurança
+            total: totalFloat.toFixed(2),
             pagamento: pgt,
             troco: tr || "Não precisa",
-            itens: itensParaFirebase,
+            itens: itensParaFirebase, // COMPLETO com bebidas
             tipo: isDelivery ? "DELIVERY" : "RETIRADA",
             origem: "SITE",
             bairro: b,
@@ -1515,13 +1517,13 @@ window.confirmarEPublicar = async () => {
             data: timestamp
         });
 
-        // 5. ENVIO COMANDA TRADICIONAL (SÓ SE HOUVER)
+        // 5. ENVIO COMANDA TRADICIONAL (SÓ LANCHES)
         if (itensTradicionais.length > 0) {
             await addDoc(collection(db, "pedidos"), {
                 pedidoID: pedidoAgrupadorID,
                 nome: n.toUpperCase(),
                 itens: itensTradicionais.map(i => ({
-                    n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
+                    n: (i.adicionais && i.adicionais.length > 0) ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
                     q: i.qtd,
                     obs: i.obs || ""
                 })),
@@ -1531,13 +1533,13 @@ window.confirmarEPublicar = async () => {
             });
         }
 
-        // 6. ENVIO COMANDA ARTESANAL (SÓ SE HOUVER)
+        // 6. ENVIO COMANDA ARTESANAL (SÓ LANCHES)
         if (itensArtesanais.length > 0) {
             await addDoc(collection(db, "pedidos"), {
                 pedidoID: pedidoAgrupadorID,
                 nome: n.toUpperCase(),
                 itens: itensArtesanais.map(i => ({
-                    n: i.adicionais.length > 0 ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
+                    n: (i.adicionais && i.adicionais.length > 0) ? `${i.nome} (+ ${i.adicionais.join(', ')})` : i.nome,
                     q: i.qtd,
                     obs: i.obs || ""
                 })),
@@ -1550,7 +1552,7 @@ window.confirmarEPublicar = async () => {
         // 7. MONTAGEM DA MENSAGEM WHATSAPP
         let itensWpp = Object.values(carrinho).map(i => {
             let itemStr = `✅ *${i.qtd}x ${i.nome.toUpperCase()}*`;
-            if (i.adicionais.length > 0) itemStr += `%0A      *+Add:* _${i.adicionais.join(', ')}_`;
+            if (i.adicionais && i.adicionais.length > 0) itemStr += `%0A      *+Add:* _${i.adicionais.join(', ')}_`;
             if (i.obs && i.obs.trim() !== "") itemStr += `%0A      *OBS:* ${i.obs.trim()}`;
             itemStr += `%0A      *R$ ${(i.preco * i.qtd).toFixed(2)}*`;
             return itemStr;
@@ -1576,29 +1578,31 @@ window.confirmarEPublicar = async () => {
         }, 1000);
 
     } catch (err) {
-        enviandoPedido = false; // Libera a trava em caso de erro para tentar de novo
+        enviandoPedido = false; 
         console.error(err);
         alert("❌ Erro ao enviar pedido: " + err.message);
     }
 };
-        // Renderizar o menu e o carrinho inicial
-        window.renderMenu = (lista = produtos) => {
-            const grid = document.getElementById('menu-grid');
-            grid.innerHTML = lista.map(p => `
-            <div class="product-card">
-                <img src="${p.img}">
-                <div class="p-content">
-                    <h3>${p.nome}</h3>
-                    <span class="p-price">R$ ${p.preco.toFixed(2)}</span>
-                    <div class="p-actions" style="margin-top: auto;">
-                        <button class="btn-details" style="width:100%" onclick="window.abrirModalCustomizacao(${p.id})">ADICIONAR</button>
-                    </div>
-                </div>
-            </div>`).join('');
-        };
 
-        window.renderMenu();
-        window.atualizarUI();
+// Renderizar o menu e o carrinho inicial
+window.renderMenu = (lista = produtos) => {
+    const grid = document.getElementById('menu-grid');
+    if (!grid) return;
+    grid.innerHTML = lista.map(p => `
+    <div class="product-card">
+        <img src="${p.img}" alt="${p.nome}">
+        <div class="p-content">
+            <h3>${p.nome}</h3>
+            <span class="p-price">R$ ${p.preco.toFixed(2)}</span>
+            <div class="p-actions" style="margin-top: auto;">
+                <button class="btn-details" style="width:100%" onclick="window.abrirModalCustomizacao(${p.id})">ADICIONAR</button>
+            </div>
+        </div>
+    </div>`).join('');
+};
+
+window.renderMenu();
+window.atualizarUI();
 
         // Bloqueios de segurança
   document.addEventListener('keydown', function (e) {
@@ -1612,4 +1616,4 @@ window.confirmarEPublicar = async () => {
     </script>
 </body>
 
-</html>async function handleCheckout
+</html>
