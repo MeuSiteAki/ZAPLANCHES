@@ -1520,23 +1520,24 @@ window.confirmarEPublicar = async () => {
             obs: i.obs || ""
         }));
 
-        await addDoc(collection(db, "pedidos"), {
-            pedidoID: pedidoAgrupadorID,
-            nome: n.toUpperCase(),
-            telefone: tel,
-            total: totalFloat.toFixed(2),
-            pagamento: pgt,
-            troco: tr || "Não precisa",
-            itens: itensParaFirebase, // COMPLETO com bebidas
-            tipo: isDelivery ? "DELIVERY" : "RETIRADA",
-            origem: "SITE",
-            bairro: b,
-            endereco: end,
-            frete: valorFrete,
-            status: 'novo',
-            data: timestamp
-        });
-
+        // Onde você define o objeto para o addDoc, mude para:
+await addDoc(collection(db, "pedidos"), {
+    pedidoID: pedidoAgrupadorID,
+    nome: n.toUpperCase(),
+    telefone: tel,
+    total: totalFloat.toFixed(2),
+    pagamento: pgt,
+    // MUDANÇA AQUI: de 'troco' para 'trocoPara'
+    trocoPara: (pgt === 'Dinheiro' && tr) ? parseFloat(tr) : 0, 
+    itens: itensParaFirebase,
+    tipo: isDelivery ? "DELIVERY" : "RETIRADA",
+    origem: "SITE",
+    bairro: b,
+    endereco: end,
+    frete: valorFrete,
+    status: 'novo',
+    data: timestamp
+});
         // 5. ENVIO COMANDA TRADICIONAL (SÓ LANCHES)
         if (itensTradicionais.length > 0) {
             await addDoc(collection(db, "pedidos"), {
@@ -1637,3 +1638,11 @@ window.atualizarUI();
 </body>
 
 </html>
+// No SITE (github)
+const pedido = {
+    nome: nomeCliente,
+    total: totalGeral,
+    pagamento: formaPagamento,
+    trocoPara: document.getElementById('input-troco').value, // ESTE NOME AQUI
+    data: new Date()
+}
