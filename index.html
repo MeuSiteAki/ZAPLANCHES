@@ -723,6 +723,159 @@
     overflow-y: auto;
     padding-bottom: 30px;
 }
+/* --- ESTILO ATRAENTE PARA PROMOÇÕES --- */
+
+/* Container Geral (No PC centralizado, no mobile full) */
+.promo-container {
+    padding: 15px 10px;
+    margin: 0 auto;
+    max-width: 650px; /* Um pouco mais largo para acomodar a borda grossa */
+}
+
+/* Wrapper para colocar lado a lado (Mobile First) */
+.promo-wrapper {
+    display: flex;
+    gap: 15px; /* Mais espaço entre os cards */
+    justify-content: center;
+}
+
+/* Card Individual (Estilo Premium) */
+.promo-card {
+    flex: 1; 
+    max-width: 300px; /* Ajuste sutil na largura máxima */
+    
+    /* Fundo: Gradiente sutil do preto para um verde bem escuro */
+    background: linear-gradient(145deg, #0a0a0a 0%, #051a05 100%);
+    
+    /* BORDA GROSSA E PULSANTE */
+    border: 4px solid var(--primary); /* Verde limão padrão */
+    box-shadow: 0 0 15px rgba(21, 255, 0, 0.3); /* Brilho suave inicial */
+    animation: bordaPulse 2.5s infinite alternate; /* Animação de brilho */
+    
+    border-radius: 18px; /* Cantos mais arredondados */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative; /* Para o Badge opcional */
+}
+
+/* Efeito de destaque ao passar o mouse (PC) */
+.promo-card:hover {
+    transform: translateY(-8px) scale(1.02); /* Flutua e cresce um pouco */
+    box-shadow: 0 10px 30px rgba(21, 255, 0, 0.6); /* Brilho intenso no hover */
+}
+/* Ajuste para o texto do botão do alerta ficar legível */
+.btn-confirm-swal {
+    color: #000 !important; /* Texto preto no botão verde */
+    font-weight: bold !important;
+    padding: 12px 25px !important;
+    border-radius: 10px !important;
+    width: 100% !important; /* Botão largo no mobile */
+}
+
+/* Ajuste para o rádio não ficar espremido */
+.swal2-radio {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    margin-left: 20px !important;
+    gap: 10px !important;
+}
+/* ANIMAÇÃO DA BORDA PULSANTE */
+@keyframes bordaPulse {
+    0% {
+        border-color: var(--primary); /* Verde limão */
+        box-shadow: 0 0 10px rgba(21, 255, 0, 0.3);
+    }
+    100% {
+        border-color: #fff; /* Pulsa para o branco para um brilho mais forte */
+        box-shadow: 0 0 25px rgba(21, 255, 0, 0.7);
+    }
+}
+
+/* 1. Imagem (Container Quadrado Perfeito) */
+.promo-card img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1; /* Força quadrado */
+    object-fit: contain; /* Não corta a foto */
+    background: #000;
+    border-bottom: 2px solid rgba(21, 255, 0, 0.2); /* Linha divisória sutil */
+    padding: 10px; /* Espaço para a imagem não colar na borda grossa */
+}
+
+/* 2. Informações (Meio) */
+.promo-info {
+    padding: 15px 10px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 8px; /* Espaço entre elementos */
+}
+
+.promo-info h3 {
+    color: var(--primary); /* Verde limão */
+    font-size: 1rem;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Sombra no texto */
+}
+
+.promo-info p {
+    color: #b0b0b0; /* Cinza claro legível */
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.3;
+    min-height: 40px; /* Alinhamento dos botões */
+    font-weight: 500;
+}
+
+/* Preço com Destaque Verde */
+.promo-price {
+    background: var(--btn-success); /* Verde escuro profissional */
+    color: #fff;
+    font-weight: 900;
+    font-size: 1.3rem;
+    padding: 8px 15px;
+    border-radius: 30px; /* Formato pílula */
+    display: inline-block;
+    margin: 5px auto 10px auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* 3. Botão (Base com Inversão de Cor no Hover) */
+.promo-btn {
+    background: var(--primary); /* Verde limão */
+    color: #000;
+    border: none;
+    padding: 15px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    width: 100%;
+    transition: 0.3s ease;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Hover Invertido no Botão */
+.promo-btn:hover {
+    background: #fff; /* Muda para branco */
+    color: #000; /* Texto preto */
+    font-size: 0.95rem; /* Aumenta sutilmente a fonte */
+}
+
+/* Ajustes para Celulares Pequenos */
+@media (max-width: 400px) {
+    .promo-card { border-width: 3px; } /* Borda um pouco menor no mobile muito pequeno */
+    .promo-info h3 { font-size: 0.85rem; }
+    .promo-price { font-size: 1.1rem; padding: 6px 12px; }
+    .promo-wrapper { gap: 10px; }
+}
     </style>
 </head>
 
@@ -794,6 +947,31 @@
             <button class="tab-item" onclick="filterItems('bebidas', this)">🍹 BEBIDAS</button>
         </nav>
     </div>
+    <div class="promo-wrapper">
+    <div class="promo-card">
+        <img src="promo1.jpeg" alt="PROMOZAP">
+        <div class="promo-info">
+            <h3>PROMOZAP</h3>
+            <p>1 Burguer Pepperoni + 1 Batata + 1 Refri</p>
+            <span class="promo-price">R$ 25,00</span>
+        </div>
+        <button class="promo-btn" onclick="window.adicionarPromoManual(2001, 'PROMOZAP', 25.0, 'Combo Pepperoni + Batata')">
+            ADICIONAR
+        </button>
+    </div>
+
+    <div class="promo-card">
+        <img src="promo2.jpeg" alt="COMBO CASAL">
+        <div class="promo-info">
+            <h3>COMBO CASAL</h3>
+            <p>2 Burguer Mini + 1 Batata + 1 Refri</p>
+            <span class="promo-price">R$ 38,00</span>
+        </div>
+        <button class="promo-btn" onclick="window.adicionarPromoManual(2002, 'COMBO CASAL', 38.0, 'Combo 2 Mini + Batata')">
+            ADICIONAR
+        </button>
+    </div>
+</div>
 <span style="font-size: 10px;">*Imagem meramente ilustrativa</span>
     <main id="menu-grid" class="products-grid"></main>
 
@@ -1678,9 +1856,86 @@ window.confirmarEPublicar = async () => {
 };
 
 // Renderizar o menu e o carrinho inicial
+// --- INICIALIZAÇÃO E EXPOSIÇÃO GLOBAL ---
+
+// 1. Expõe as variáveis e funções para o HTML externo (essencial para as promoções)
+window.carrinho = carrinho;
+window.atualizarUI = atualizarUI;
+window.showToast = showToast;
+
+// --- FUNÇÃO DE PROMOÇÃO COM ESCOLHA DE REFRI ---
+
+window.adicionarPromoManual = async (id, nome, preco, descricaoBase) => {
+    const sabores = ["Coca Cola", "Fanta Laranja", "Guaraná Antártica", "Sprite", "Coca Zero", "Fanta Uva", "Guaraná Jesus"];
+    
+    const inputOptions = {};
+    sabores.forEach(sabor => { inputOptions[sabor] = sabor; });
+
+    const { value: saborEscolhido } = await Swal.fire({
+        title: '<span style="color: #fff; font-size: 1.2rem; font-weight: bold;">ESCOLHA SEU REFRI 🥤</span>',
+        input: 'radio',
+        inputOptions: inputOptions,
+        
+        // --- ESTILIZAÇÃO DARK ---
+        background: ' #0f0f0f', 
+        color: '#121212',     
+        confirmButtonText: 'ADICIONAR AO CARRINHO',
+        confirmButtonColor: '#21ff00', // Verde Limão do seu sistema
+        
+        // Customização via Classes do SweetAlert
+        customClass: {
+            popup: 'border-promo-swal', // Classe para borda (opcional)
+            input: 'radio-dark-custom',
+            confirmButton: 'btn-confirm-swal'
+        },
+
+        // Garante que o rádio e os labels fiquem brancos
+        didOpen: () => {
+            const container = Swal.getHtmlContainer();
+            if (container) {
+                // Força todos os textos de opções (labels) a ficarem brancos
+                const labels = container.querySelectorAll('label');
+                labels.forEach(label => {
+                    label.style.color = '#fff';
+                    label.style.fontSize = '1rem';
+                    label.style.marginBottom = '8px';
+                    label.style.display = 'flex';
+                });
+            }
+        },
+
+        inputValidator: (value) => {
+            if (!value) {
+                return '<span style="color: #ff4d4d;">Escolha um sabor para continuar!</span>';
+            }
+        }
+    });
+
+    if (saborEscolhido) {
+        const cartId = "promo_" + Date.now();
+        
+        window.carrinho[cartId] = {
+            id: id,
+            nome: nome,
+            preco: parseFloat(preco),
+            qtd: 1,
+            obs: `${descricaoBase} | REFRI: ${saborEscolhido}`,
+            adicionais: [],
+            cat: "art", 
+            cartId: cartId
+        };
+
+        window.atualizarUI();
+        window.showToast(`🔥 Adicionado: ${saborEscolhido}`);
+    }
+};
+
+// --- RENDERIZAÇÃO DO MENU ---
+
 window.renderMenu = (lista = produtos) => {
     const grid = document.getElementById('menu-grid');
     if (!grid) return;
+    
     grid.innerHTML = lista.map(p => `
     <div class="product-card">
         <img src="${p.img}" alt="${p.nome}">
@@ -1694,6 +1949,23 @@ window.renderMenu = (lista = produtos) => {
     </div>`).join('');
 };
 
+// --- FUNÇÃO DE AUXÍLIO PARA TROCO ---
+
+window.toggleInputTroco = (show) => {
+    const inputDiv = document.getElementById('input-valor-troco');
+    if (show) {
+        inputDiv.style.display = 'block';
+        document.getElementById('troco').focus();
+        setTimeout(() => {
+            inputDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+    } else {
+        inputDiv.style.display = 'none';
+        document.getElementById('troco').value = "";
+    }
+};
+
+// Execução Inicial
 window.renderMenu();
 window.atualizarUI();
 
