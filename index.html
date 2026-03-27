@@ -1078,7 +1078,7 @@
 
     <select id="pagamento" onchange="checkPagamento(this.value)" required>
         <option value="">Escolha o Pagamento *</option>
-        <option >Pix (WhatsApp)</option>
+        <option value="Pix" >Pix (WhatsApp)</option>
         <option value="Cartão">Cartão (Na entrega)</option>
         <option value="Dinheiro">Dinheiro (Na entrega)</option>
     </select>
@@ -1616,10 +1616,10 @@
 let enviandoPedido = false;
 
 // --- FUNÇÃO DE CHECKOUT ---
+// --- FUNÇÃO DE CHECKOUT ---
 async function handleCheckout(e) {
     e.preventDefault();
 
-    // Trava para evitar múltiplos cliques
     if (enviandoPedido) return;
 
     if (Object.keys(carrinho).length === 0) {
@@ -1630,67 +1630,50 @@ async function handleCheckout(e) {
     const pgt = document.getElementById('pagamento').value;
     const totalFloat = parseFloat(valorSubtotal + valorFrete);
 
-    // Validação de segurança para o valor total
     if (isNaN(totalFloat) || totalFloat <= 0) {
         alert("⚠️ Erro no cálculo do valor total. Por favor, reinicie o pedido.");
         return;
     }
 
-    if (pgt === 'Pix') {
-        const pixKey = "23078414000139"; // Sua chave CNPJ
-
-        // Gera o código Pix
-        const pixCode = buildPixBRCode(
-            pixKey,
-            "ZAPLANCHE",
-            "ITINGA MA",
-            totalFloat
-        );
-
-        document.getElementById('pix-payload-text').innerText = pixCode;
-        document.getElementById('qrcode-img').src = `https://quickchart.io/qr?text=${encodeURIComponent(pixCode)}&size=250`;
-        document.getElementById('pix-modal').style.display = 'flex';
-    } else {
-        await window.confirmarEPublicar();
-    }
+    await window.confirmarEPublicar();
 }
 
-// --- MOTOR DO PIX (Cálculo de CRC e Estrutura) ---
-function crc16(payload) {
-    let crc = 0xFFFF;
-    const bytes = new TextEncoder().encode(payload);
-    for (const byte of bytes) {
-        crc ^= (byte << 8);
-        for (let i = 0; i < 8; i++) {
-            if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
-            else crc = (crc << 1);
-            crc &= 0xFFFF;
-        }
-    }
-    return crc.toString(16).toUpperCase().padStart(4, '0');
-}
+// // --- MOTOR DO PIX (Cálculo de CRC e Estrutura) ---
+// function crc16(payload) {
+//     let crc = 0xFFFF;
+//     const bytes = new TextEncoder().encode(payload);
+//     for (const byte of bytes) {
+//         crc ^= (byte << 8);
+//         for (let i = 0; i < 8; i++) {
+//             if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
+//             else crc = (crc << 1);
+//             crc &= 0xFFFF;
+//         }
+//     }
+//     return crc.toString(16).toUpperCase().padStart(4, '0');
+// }
 
-function buildPixBRCode(key, name, city, amount) {
-    const tlv = (id, val) => id + String(val.length).padStart(2, '0') + val;
-    const gui = "BR.GOV.BCB.PIX";
-    const mai = tlv("00", gui) + tlv("01", key);
-    const merchantAccount = tlv("26", mai);
+// function buildPixBRCode(key, name, city, amount) {
+//     const tlv = (id, val) => id + String(val.length).padStart(2, '0') + val;
+//     const gui = "BR.GOV.BCB.PIX";
+//     const mai = tlv("00", gui) + tlv("01", key);
+//     const merchantAccount = tlv("26", mai);
 
-    let payload = "";
-    payload += tlv("00", "01");
-    payload += tlv("01", "11");
-    payload += merchantAccount;
-    payload += tlv("52", "0000");
-    payload += tlv("53", "986");
-    if (amount > 0) payload += tlv("54", amount.toFixed(2));
-    payload += tlv("58", "BR");
-    payload += tlv("59", name.substring(0, 25).toUpperCase());
-    payload += tlv("60", city.substring(0, 15).toUpperCase());
-    payload += tlv("62", tlv("05", "***"));
-    payload += "6304";
+//     let payload = "";
+//     payload += tlv("00", "01");
+//     payload += tlv("01", "11");
+//     payload += merchantAccount;
+//     payload += tlv("52", "0000");
+//     payload += tlv("53", "986");
+//     if (amount > 0) payload += tlv("54", amount.toFixed(2));
+//     payload += tlv("58", "BR");
+//     payload += tlv("59", name.substring(0, 25).toUpperCase());
+//     payload += tlv("60", city.substring(0, 15).toUpperCase());
+//     payload += tlv("62", tlv("05", "***"));
+//     payload += "6304";
 
-    return payload + crc16(payload);
-}
+//     return payload + crc16(payload);
+// }
 
 // --- FINALIZAÇÃO (FIREBASE + WHATSAPP) ---
 window.confirmarEPublicar = async () => {
