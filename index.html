@@ -962,17 +962,17 @@
         </button>
     </div> -->
 
-    <!-- <div class="promo-card">
+    <div class="promo-card">
         <img src="promo3.jpeg" alt="COMBO CASAL">
         <div class="promo-info">
             <h3>COMBO CASAL</h3>
-            <p>2 Burguer Mini, (acompanha batata), + 1 Refri Lata</p>
-            <span class="promo-price">R$ 42,00</span>
+            <p>2 Pepperoni, (acompanha batata), + 1 Refri Lata</p>
+            <span class="promo-price">R$ 50,00</span>
         </div>
-        <button class="promo-btn" onclick="window.adicionarPromoManual(2002, 'COMBO CASAL', 42.0, '2 Burguer Mini, acompanha batata, + 1 Refri Lata')">
+        <button class="promo-btn" onclick="window.adicionarPromoManual(2002, 'COMBO CASAL', 50.0, '2 Pepperoni, acompanha batata, + 1 Refri Lata')">
             ADICIONAR
         </button>
-    </div> -->
+    </div>
 </div>
 
 
@@ -1569,34 +1569,37 @@
 
     // frete
         window.updateFrete = () => {
-            const b = document.getElementById('bairro').value;
+    const b = document.getElementById('bairro').value;
 
-            if (!isDelivery || !b) {
-                valorFrete = 0;
-            } else {
-                // Lógica baseada na tabela da imagem
-                switch (b) {
-                    case 'Itinga-PA':
-                    case 'Paulistão':
-                        valorFrete = 6.00;
-                        break;
-                    case 'Jamel':
-                        valorFrete = 4.00;
-                        break;
-                    case 'São João':
-                        valorFrete = 3.00;
-                        break;
-                    case 'Paraíso':
-                        valorFrete = 0.00;
-                        break;
-                    default:
-                        // Todos os outros bairros da lista custam R$ 2,00
-                        valorFrete = 2.00;
-                        break;
-                }
-            }
-            window.atualizarUI();
-        };
+    // Verifica se tem COMBO CASAL no carrinho
+    const temCombo = Object.values(carrinho).some(i => i.id === 2002);
+
+    if (!isDelivery || !b) {
+        valorFrete = 0;
+    } else if (temCombo) {
+        valorFrete = 0; // Frete grátis quando tem Combo Casal
+    } else {
+        switch (b) {
+            case 'Itinga-PA':
+            case 'Paulistão':
+                valorFrete = 6.00;
+                break;
+            case 'Jamel':
+                valorFrete = 4.00;
+                break;
+            case 'São João':
+                valorFrete = 3.00;
+                break;
+            case 'Paraíso':
+                valorFrete = 0.00;
+                break;
+            default:
+                valorFrete = 2.00;
+                break;
+        }
+    }
+    window.atualizarUI();
+};
 
         window.checkPagamento = (v) => {
             document.getElementById('troco-box').style.display = v === 'Dinheiro' ? 'block' : 'none';
