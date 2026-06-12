@@ -880,7 +880,26 @@
 </head>
 
 <body>
-
+<!-- BLOQUEIO DE LOJA FECHADA -->
+<div id="overlay-fechado" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    z-index: 99999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+">
+    <div style="font-size: 70px; margin-bottom: 20px;">🔒</div>
+    <h1 style="color: #ff3b30; font-size: 2rem; margin-bottom: 10px;">ESTAMOS FECHADOS</h1>
+    <p style="color: #aaa; font-size: 1.1rem; max-width: 350px; line-height: 1.6;" id="msg-fechado">
+        Nosso horário de atendimento é de <strong style="color:white">Seg. a Dom. das 18:30 às 23:59</strong>, exceto às Quintas-feiras.
+    </p>
+    <p style="color: #555; font-size: 0.85rem; margin-top: 25px;">Volte mais tarde 💚</p>
+</div>
     <div id="intro-screen">
         <img src="logo.png" class="intro-logo">
         <h1 style="margin-top:15px; color: white;">ZAP<span style="color: var(--primary);">LANCHES</span></h1>
@@ -936,7 +955,7 @@
 
         // Executa ao carregar
         atualizarStatusLoja();
-        // Atualiza a cada 30 segundos
+        // /> Atualiza a cada 30 segundos
         setInterval(atualizarStatusLoja, 30000);
     </script>
     <div class="categories-wrapper">
@@ -962,17 +981,17 @@
         </button>
     </div> -->
 
-    <!-- <div class="promo-card">
+    <div class="promo-card">
         <img src="promo3.jpeg" alt="COMBO CASAL">
         <div class="promo-info">
             <h3>COMBO CASAL</h3>
-            <p>2 Pepperoni, (acompanha batata), + 1 Refri Lata</p>
-            <span class="promo-price">R$ 50,00</span>
+            <p>2 Polenguinho, (acompanha batata), + 1 Refri Lata</p>
+            <span class="promo-price">R$ 48,00</span>
         </div>
-        <button class="promo-btn" onclick="window.adicionarPromoManual(2002, 'COMBO CASAL', 50.0, '2 Pepperoni, acompanha batata, + 1 Refri Lata')">
+        <button class="promo-btn" onclick="window.adicionarPromoManual(2002, 'COMBO CASAL', 48.0, '2 Polenguinho, acompanha batata, + 1 Refri Lata')">
             ADICIONAR
         </button>
-    </div> -->
+    </div>
 </div>
 
 
@@ -1125,7 +1144,7 @@
 
             <div class="footer-block footer-contact">
                 <h3><i class="fa-solid fa-headset"></i> CONTATOS:</h3>
-                <p><a href="tel:+5599992261907">(99) 99172-4374</a></p>
+                <p><a href="tel:+5599991724374">(99) 99172-4374</a></p>
                 <p>Endereço: BR - 010 (proximo o avião)<br>Paraiso, Itinga do Maranhão.</p>
             </div>
 
@@ -1215,7 +1234,7 @@
     </style><br>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDRj1Cj0o1z9u7fS9InPlSlqvmcetMmMUU",
@@ -1228,6 +1247,63 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // --- VERIFICAÇÃO DE LOJA ABERTA/FECHADA EM TEMPO REAL (Econômico) ---
+        function verificarStatusLoja() {
+            const overlay = document.getElementById('overlay-fechado');
+            const msgEl = document.getElementById('msg-fechado');
+
+            // Quinta = dia 4
+            const hoje = new Date();
+            const isQuinta = hoje.getDay() === 4;
+
+            if (isQuinta) {
+                if (msgEl) msgEl.innerHTML = 'Hoje é nosso dia de <strong style="color:white">folga</strong>! 😴<br><br>Voltamos amanhã a partir das <strong style="color:white">18:30</strong>.';
+                if (overlay) overlay.style.display = 'flex';
+                return;
+            }
+
+            try {
+                // Escuta o documento config/loja em tempo real
+                onSnapshot(doc(db, "config", "loja"), (snap) => {
+                    const aberto = snap.exists() ? snap.data().aberto : true;
+                    if (overlay) {
+                        if (aberto) {
+                            overlay.style.display = 'none';
+                        } else {
+                            overlay.style.display = 'flex';
+                        }
+                    }
+                }, (error) => {
+                    console.warn("Não foi possível verificar status da loja em tempo real:", error);
+                });
+            } catch (e) {
+                console.warn("Erro ao configurar listener do status da loja:", e);
+            }
+        }
+        verificarStatusLoja();
+        
+        // --- CONTROLE DE ESTOQUE (PRODUTOS ESGOTADOS) EM TEMPO REAL ---
+        window.produtosEsgotados = [];
+        function escutarProdutosEsgotados() {
+            try {
+                onSnapshot(doc(db, "config", "produtos_esgotados"), (snap) => {
+                    if (snap.exists()) {
+                        window.produtosEsgotados = snap.data().ids || [];
+                    } else {
+                        window.produtosEsgotados = [];
+                    }
+                    if (typeof window.renderMenu === "function") {
+                        window.renderMenu();
+                    }
+                }, (error) => {
+                    console.warn("Erro ao ler produtos esgotados em tempo real:", error);
+                });
+            } catch (e) {
+                console.warn("Erro ao configurar listener de produtos esgotados:", e);
+            }
+        }
+        escutarProdutosEsgotados();
 
         // --- DADOS ---
 
@@ -1621,7 +1697,6 @@
 let enviandoPedido = false;
 
 // --- FUNÇÃO DE CHECKOUT ---
-// --- FUNÇÃO DE CHECKOUT ---
 async function handleCheckout(e) {
     e.preventDefault();
 
@@ -1642,43 +1717,6 @@ async function handleCheckout(e) {
 
     await window.confirmarEPublicar();
 }
-
-// // --- MOTOR DO PIX (Cálculo de CRC e Estrutura) ---
-// function crc16(payload) {
-//     let crc = 0xFFFF;
-//     const bytes = new TextEncoder().encode(payload);
-//     for (const byte of bytes) {
-//         crc ^= (byte << 8);
-//         for (let i = 0; i < 8; i++) {
-//             if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
-//             else crc = (crc << 1);
-//             crc &= 0xFFFF;
-//         }
-//     }
-//     return crc.toString(16).toUpperCase().padStart(4, '0');
-// }
-
-// function buildPixBRCode(key, name, city, amount) {
-//     const tlv = (id, val) => id + String(val.length).padStart(2, '0') + val;
-//     const gui = "BR.GOV.BCB.PIX";
-//     const mai = tlv("00", gui) + tlv("01", key);
-//     const merchantAccount = tlv("26", mai);
-
-//     let payload = "";
-//     payload += tlv("00", "01");
-//     payload += tlv("01", "11");
-//     payload += merchantAccount;
-//     payload += tlv("52", "0000");
-//     payload += tlv("53", "986");
-//     if (amount > 0) payload += tlv("54", amount.toFixed(2));
-//     payload += tlv("58", "BR");
-//     payload += tlv("59", name.substring(0, 25).toUpperCase());
-//     payload += tlv("60", city.substring(0, 15).toUpperCase());
-//     payload += tlv("62", tlv("05", "***"));
-//     payload += "6304";
-
-//     return payload + crc16(payload);
-// }
 
 // --- FINALIZAÇÃO (FIREBASE + WHATSAPP) ---
 window.confirmarEPublicar = async () => {
@@ -1843,7 +1881,6 @@ window.confirmarEPublicar = async () => {
     }
 };
 
-// Renderizar o menu e o carrinho inicial
 // --- INICIALIZAÇÃO E EXPOSIÇÃO GLOBAL ---
 
 // 1. Expõe as variáveis e funções para o HTML externo (essencial para as promoções)
@@ -1852,7 +1889,6 @@ window.atualizarUI = atualizarUI;
 window.showToast = showToast;
 
 // --- FUNÇÃO DE PROMOÇÃO COM ESCOLHA DE REFRI ---
-
 window.adicionarPromoManual = async (id, nome, preco, descricaoBase) => {
     const sabores = ["Coca Cola", "Fanta Laranja", "Guaraná Antártica", "Sprite", "Coca Zero", "Fanta Uva", "Guaraná Jesus"];
     
@@ -1919,26 +1955,37 @@ window.adicionarPromoManual = async (id, nome, preco, descricaoBase) => {
 };
 
 // --- RENDERIZAÇÃO DO MENU ---
-
 window.renderMenu = (lista = produtos) => {
     const grid = document.getElementById('menu-grid');
     if (!grid) return;
     
-    grid.innerHTML = lista.map(p => `
-    <div class="product-card">
-        <img src="${p.img}" alt="${p.nome}">
-        <div class="p-content">
-            <h3>${p.nome}</h3>
-            <span class="p-price">R$ ${p.preco.toFixed(2)}</span>
-            <div class="p-actions" style="margin-top: auto;">
-                <button class="btn-details" style="width:100%" onclick="window.abrirModalCustomizacao(${p.id})">ADICIONAR</button>
+    const esgotados = window.produtosEsgotados || [];
+    
+    grid.innerHTML = lista.map(p => {
+        const isEsgotado = esgotados.includes(p.id) || esgotados.includes(String(p.id)) || (p.id_art && esgotados.includes(p.id_art));
+        return `
+        <div class="product-card" style="position: relative; ${isEsgotado ? 'opacity: 0.65;' : ''}">
+            ${isEsgotado ? `
+                <div style="position: absolute; top: 12px; right: 12px; background: #ef4444; color: white; padding: 4px 8px; font-weight: 800; font-size: 0.7rem; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4); z-index: 5;">
+                    ESGOTADO
+                </div>
+            ` : ''}
+            <img src="${p.img}" alt="${p.nome}" style="${isEsgotado ? 'filter: grayscale(80%) blur(1px);' : ''}">
+            <div class="p-content" style="${isEsgotado ? 'color: #888;' : ''}">
+                <h3>${p.nome}</h3>
+                <span class="p-price" style="${isEsgotado ? 'color: #777;' : ''}">R$ ${p.preco.toFixed(2)}</span>
+                <div class="p-actions" style="margin-top: auto;">
+                    ${isEsgotado 
+                        ? `<button class="btn-details" style="width:100%; bg: #3f3f46; background: #27272a; border-color: #3f3f46; color: #71717a; cursor: not-allowed; pointer-events: none;" disabled>ESGOTADO</button>` 
+                        : `<button class="btn-details" style="width:100%" onclick="window.abrirModalCustomizacao(${p.id})">ADICIONAR</button>`
+                    }
+                </div>
             </div>
-        </div>
-    </div>`).join('');
+        </div>`;
+    }).join('');
 };
 
 // --- FUNÇÃO DE AUXÍLIO PARA TROCO ---
-
 window.toggleInputTroco = (show) => {
     const inputDiv = document.getElementById('input-valor-troco');
     if (show) {
@@ -1959,7 +2006,6 @@ window.atualizarUI();
 
 window.toggleInputTroco = (show) => {
     const inputDiv = document.getElementById('input-valor-troco');
-    const checkoutBtn = document.querySelector('.btn-finalizar-checkout'); // Ajuste para a classe do seu botão de finalizar
     
     if (show) {
         inputDiv.style.display = 'block';
@@ -1987,7 +2033,9 @@ window.checkPagamento = (v) => {
         window.toggleInputTroco(false);
     }
 };
-        // Bloqueios de segurança
+
+
+// Bloqueios de segurança
   document.addEventListener('keydown', function (e) {
     if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
     if (e.key === 'F12') { e.preventDefault(); }
