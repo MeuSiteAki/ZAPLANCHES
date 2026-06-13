@@ -981,7 +981,7 @@
         </button>
     </div> -->
 
-    <div class="promo-card">
+    <!-- <div class="promo-card">
         <img src="promo3.jpeg" alt="COMBO CASAL">
         <div class="promo-info">
             <h3>COMBO CASAL</h3>
@@ -991,7 +991,7 @@
         <button class="promo-btn" onclick="window.adicionarPromoManual(2002, 'COMBO CASAL', 48.0, '2 Polenguinho, acompanha batata, + 1 Refri Lata')">
             ADICIONAR
         </button>
-    </div>
+    </div> -->
 </div>
 
 
@@ -1644,36 +1644,36 @@
 };
 
     // frete
-//         window.updateFrete = () => {
-//     const b = document.getElementById('bairro').value;
-//     const temCombo = Object.values(carrinho).some(i => i.id === 2002);
+        window.updateFrete = () => {
+    const b = document.getElementById('bairro').value;
+    const temCombo = Object.values(carrinho).some(i => i.id === 2002);
 
-//     if (!isDelivery || !b) {
-//         valorFrete = 0;
-//     } else if (temCombo) {
-//         valorFrete = 0; // Frete grátis quando tem Combo Casal
-//     } else {
-//         switch (b) {
-//             case 'Itinga-PA':
-//             case 'Paulistão':
-//                 valorFrete = 6.00;
-//                 break;
-//             case 'Jamel':
-//                 valorFrete = 4.00;
-//                 break;
-//             case 'São João':
-//                 valorFrete = 3.00;
-//                 break;
-//             case 'Paraíso':
-//                 valorFrete = 0.00;
-//                 break;
-//             default:
-//                 valorFrete = 2.00;
-//                 break;
-//         }
-//     }
-//     window.atualizarUI();
-// };
+    if (!isDelivery || !b) {
+        valorFrete = 0;
+    } else if (temCombo) {
+        valorFrete = 0; // Frete grátis quando tem Combo Casal
+    } else {
+        switch (b) {
+            case 'Itinga-PA':
+            case 'Paulistão':
+                valorFrete = 6.00;
+                break;
+            case 'Jamel':
+                valorFrete = 4.00;
+                break;
+            case 'São João':
+                valorFrete = 3.00;
+                break;
+            case 'Paraíso':
+                valorFrete = 0.00;
+                break;
+            default:
+                valorFrete = 2.00;
+                break;
+        }
+    }
+    window.atualizarUI();
+};
 
         window.checkPagamento = (v) => {
             document.getElementById('troco-box').style.display = v === 'Dinheiro' ? 'block' : 'none';
